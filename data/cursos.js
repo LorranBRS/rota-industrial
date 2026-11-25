@@ -53,7 +53,7 @@ window.ROTA = {
       titulo: "Matemática para Eletricistas",
       nivel: "Iniciante",
       cargaHoraria: "10h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "A matemática que o eletricista usa de verdade: decimais, frações, potências, prefixos (k, m, µ), regra de três e porcentagem.",
       modulos: [
         { titulo: "Números e operações", aulas: ["Conjuntos numéricos", "Números decimais e arredondamento", "Frações na prática"] },
