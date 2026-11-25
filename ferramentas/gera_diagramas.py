@@ -170,6 +170,91 @@ tx += t(550, 135, "Carga", anc="start", peso="700") + t(550, 156, "recebe", anc=
 tx += t(330, 150, "Perda total: 13,8 V (6,3%)", ORANGE, peso="700", tam=15)
 arquivos["queda-tensao"] = svg(640, 280, (b, tx))
 
+# 11. eletrização: atrito, contato, indução
+def sinais(xs, y, sinal):
+    cor = RED if sinal == "+" else BLUE
+    return "".join(t(x, y, sinal, cor, peso="800", tam=20) for x in xs)
+b = ('<rect x="20" y="90" width="95" height="60" rx="8" fill="#f3e3c3"/>'
+     '<rect x="120" y="90" width="95" height="60" rx="8" fill="#dfe8f3"/>'
+     + seta(55, 172, 175, 172))
+tx = t(118, 40, "Atrito", peso="700", tam=17) + sinais((45, 67, 89), 127, "+") + sinais((145, 167, 189), 127, "−")
+tx += t(67, 78, "perdeu e⁻", MUTED, tam=12) + t(167, 78, "ganhou e⁻", MUTED, tam=12) + t(115, 192, "elétrons", BLUE, tam=12)
+tx += t(118, 228, "Sinais OPOSTOS", ORANGE, peso="700")
+b += f'<circle cx="320" cy="120" r="38" fill="#dfe8f3"/><circle cx="396" cy="120" r="38" fill="#dfe8f3"/>'
+tx += t(358, 40, "Contato", peso="700", tam=17) + sinais((305, 335), 127, "−") + sinais((381, 411), 127, "−")
+tx += t(358, 192, "as cargas se dividem", MUTED, tam=12) + t(358, 228, "Sinais IGUAIS", ORANGE, peso="700")
+b += ('<rect x="480" y="98" width="70" height="44" rx="8" fill="#f3e3c3"/>'
+      '<circle cx="625" cy="120" r="45" fill="#eef1f4"/>' + L((625, 165), (625, 190)) +
+      '<line x1="607" y1="190" x2="643" y2="190"/><line x1="613" y1="197" x2="637" y2="197"/><line x1="619" y1="204" x2="631" y2="204"/>')
+tx += t(598, 40, "Indução", peso="700", tam=17) + sinais((497, 515, 533), 127, "+")
+tx += sinais((597,), 112, "−") + sinais((597,), 137, "−") + sinais((653,), 112, "+") + sinais((653,), 137, "+")
+tx += t(515, 85, "indutor", MUTED, tam=12) + t(625, 66, "induzido", MUTED, tam=12) + t(655, 205, "terra", MUTED, anc="start", tam=12)
+tx += t(598, 228, "SEM encostar", ORANGE, peso="700")
+b += '<line x1="240" y1="30" x2="240" y2="235" stroke="#e2e5ea" stroke-width="2"/><line x1="476" y1="30" x2="476" y2="235" stroke="#e2e5ea" stroke-width="2"/>'
+arquivos["eletrizacao"] = svg(720, 250, (b, tx))
+
+# 12. linhas de campo elétrico
+def radiais(cx, cy, para_fora, angs=range(0, 360, 45), r1=30, r2=92):
+    out = ""
+    for a in angs:
+        c, sn = math.cos(math.radians(a)), math.sin(math.radians(a))
+        p1 = (cx + r1*c, cy + r1*sn); p2 = (cx + r2*c, cy + r2*sn)
+        if not para_fora: p1, p2 = p2, p1
+        out += f'<line x1="{p1[0]:.1f}" y1="{p1[1]:.1f}" x2="{p2[0]:.1f}" y2="{p2[1]:.1f}" stroke="{BLUE}" stroke-width="2" marker-end="url(#sa)"/>'
+    return out
+def carga(cx, cy, sinal):
+    cor = RED if sinal == "+" else BLUE
+    return f'<circle cx="{cx}" cy="{cy}" r="18" fill="{cor}" stroke="none"/>' + f'<text x="{cx}" y="{cy+7}" text-anchor="middle" fill="#fff" font-weight="800" font-size="22">{sinal}</text>'
+b = radiais(105, 140, True) + radiais(318, 140, False)
+for k in (-80, -40, 40, 80):
+    b += f'<path d="M 538 {140 + k*0.15:.0f} Q 595 {140 + k*1.1:.0f} 652 {140 + k*0.15:.0f}" stroke="{BLUE}" stroke-width="2" marker-end="url(#sa)"/>'
+b += f'<line x1="540" y1="140" x2="650" y2="140" stroke="{BLUE}" stroke-width="2" marker-end="url(#sa)"/>'
+b += radiais(520, 140, True, angs=(150, 180, 210), r2=65) + radiais(670, 140, False, angs=(-30, 0, 30), r2=65)
+tx = carga(105, 140, "+") + carga(318, 140, "−") + carga(520, 140, "+") + carga(670, 140, "−")
+tx += t(105, 30, "Positiva: linhas SAEM", RED, peso="700", tam=15) + t(318, 30, "Negativa: linhas CHEGAM", BLUE, peso="700", tam=15)
+tx += t(595, 30, "Par + e −", peso="700", tam=15) + t(595, 262, "as linhas vão do + para o −", MUTED, tam=13)
+arquivos["linhas-campo"] = svg(760, 275, (b, tx))
+
+# 13. fontes geradoras de tensão
+def card(i):
+    col, lin = i % 3, i // 3
+    return 10 + col*240, 10 + lin*165
+b = ""; tx = ""
+dados = [("Química", "pilhas e baterias"), ("Magnética", "geradores e alternadores"), ("Térmica", "termopar (efeito Seebeck)"),
+         ("Pressão", "piezoelétrico (acendedor)"), ("Luminosa", "placa solar"), ("Atrito", "eletricidade estática")]
+for i, (nome, ex) in enumerate(dados):
+    x0, y0 = card(i)
+    b = f'<rect x="{x0}" y="{y0}" width="228" height="152" rx="12" fill="#f6f7f9" stroke="#e2e5ea" stroke-width="1.5"/>' + b
+    tx += t(x0+114, y0+120, nome, peso="700", tam=16) + t(x0+114, y0+140, ex, MUTED, tam=12)
+cx, cy = card(0)[0]+114, card(0)[1]+55   # pilha
+b += f'<rect x="{cx-45}" y="{cy-20}" width="90" height="40" rx="6" fill="#fff"/><rect x="{cx+45}" y="{cy-8}" width="8" height="16" fill="{INK}"/>'
+tx += t(cx+28, cy+7, "+", RED, peso="800", tam=20) + t(cx-28, cy+7, "−", BLUE, peso="800", tam=20) + t(cx, cy+6, "1,5 V", tam=13, peso="700")
+cx, cy = card(1)[0]+114, card(1)[1]+55   # gerador: ímã girando dentro de bobina
+b += f'<circle cx="{cx}" cy="{cy}" r="38" stroke-dasharray="6 4"/>' + f'<path d="M {cx+44} {cy-20} A 48 48 0 0 1 {cx+44} {cy+20}" stroke="{ORANGE}" stroke-width="2.5"/>'
+tx += f'<rect x="{cx-28}" y="{cy-10}" width="28" height="20" fill="{RED}"/><rect x="{cx}" y="{cy-10}" width="28" height="20" fill="{BLUE}"/>'
+tx += t(cx-14, cy+6, "N", "#fff", peso="800", tam=13) + t(cx+14, cy+6, "S", "#fff", peso="800", tam=13) + t(cx+54, cy+5, "gira", ORANGE, anc="start", tam=12)
+cx, cy = card(2)[0]+114, card(2)[1]+50   # termopar
+b += f'<polyline points="{cx-60},{cy-30} {cx},{cy+10}" stroke="{RED}" stroke-width="3"/><polyline points="{cx+60},{cy-30} {cx},{cy+10}" stroke="{BLUE}" stroke-width="3"/>'
+tx += dot(cx, cy+10) + f'<path d="M {cx-12} {cy+42} Q {cx} {cy+10} {cx+2} {cy+18} Q {cx+6} {cy+28} {cx+12} {cy+42} Z" fill="{ORANGE}"/>'
+tx += t(cx-68, cy-34, "metal A", MUTED, anc="start", tam=11) + t(cx+68, cy-34, "metal B", MUTED, anc="end", tam=11) + t(cx, cy-30, "mV", RED, peso="700", tam=13)
+cx, cy = card(3)[0]+114, card(3)[1]+55   # piezo
+b += f'<rect x="{cx-30}" y="{cy-18}" width="60" height="36" fill="#e6e1f5"/>' + seta(cx, cy-48, cx, cy-22) + seta(cx, cy+48, cx, cy+22)
+tx += t(cx-44, cy+7, "+", RED, anc="middle", peso="800", tam=20) + t(cx+44, cy+7, "−", BLUE, peso="800", tam=20) + t(cx, cy+5, "cristal", MUTED, tam=11)
+cx, cy = card(4)[0]+114, card(4)[1]+55   # solar
+tx += f'<circle cx="{cx-55}" cy="{cy-22}" r="14" fill="#f2c200"/>'
+for a in range(0, 360, 45):
+    c, sn = math.cos(math.radians(a)), math.sin(math.radians(a))
+    b += f'<line x1="{cx-55+19*c:.1f}" y1="{cy-22+19*sn:.1f}" x2="{cx-55+26*c:.1f}" y2="{cy-22+26*sn:.1f}" stroke="#e0a800" stroke-width="2"/>'
+b += f'<polygon points="{cx-20},{cy+30} {cx+50},{cy+30} {cx+62},{cy-10} {cx-8},{cy-10}" fill="#1f3a5f"/>'
+for k in (1, 2):
+    b += f'<line x1="{cx-20+k*70/3+k*4:.1f}" y1="{cy+30}" x2="{cx-8+k*70/3+k*4:.1f}" y2="{cy-10}" stroke="#8db4e6" stroke-width="1.5"/>'
+b += f'<line x1="{cx-14}" y1="{cy+10}" x2="{cx+56}" y2="{cy+10}" stroke="#8db4e6" stroke-width="1.5"/>'
+cx, cy = card(5)[0]+114, card(5)[1]+55   # atrito
+b += f'<rect x="{cx-62}" y="{cy-18}" width="58" height="36" rx="6" fill="#f3e3c3"/><rect x="{cx+4}" y="{cy-18}" width="58" height="36" rx="6" fill="#dfe8f3"/>'
+b += f'<line x1="{cx-50}" y1="{cy-34}" x2="{cx+50}" y2="{cy-34}" stroke="{ORANGE}" stroke-width="2.5" marker-start="url(#sv)" marker-end="url(#sv)"/>'
+tx += t(cx-33, cy+7, "+ +", RED, peso="800", tam=18) + t(cx+33, cy+7, "− −", BLUE, peso="800", tam=18)
+arquivos["fontes-tensao"] = svg(730, 345, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")

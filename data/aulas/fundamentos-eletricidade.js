@@ -93,6 +93,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       As cargas do induzido se reorganizam. Se nesse momento o induzido for ligado à terra e depois desligado, ele fica carregado com
       sinal <strong>oposto</strong> ao do indutor.</p>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/eletrizacao.svg" alt="Três formas de eletrização: atrito, contato e indução" loading="lazy"><figcaption>Atrito: cargas opostas. Contato: cargas iguais. Indução: sem encostar, com ligação à terra.</figcaption></figure>
+
       <table>
         <tr><th>Processo</th><th>Precisa encostar?</th><th>Sinal final</th></tr>
         <tr><td>Atrito</td><td>Sim (esfregar)</td><td>Opostos</td></tr>
@@ -138,6 +140,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       ali sente uma força.</p>
       <div class="destaque"><strong>E = F / q</strong> — unidade: newton por coulomb (N/C), que é o mesmo que volt por metro (V/m).</div>
       <p>Por convenção, as <strong>linhas de campo</strong> saem das cargas positivas e chegam nas negativas.</p>
+
+      <figure class="diagrama"><img src="assets/img/diagramas/linhas-campo.svg" alt="Linhas de campo saindo da carga positiva e chegando na negativa" loading="lazy"><figcaption>As linhas de campo saem das cargas positivas e chegam nas negativas.</figcaption></figure>
 
       <h2>Na prática</h2>
       <ul>
@@ -198,6 +202,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <tr><td><strong>Luminosa</strong></td><td>A luz libera elétrons em materiais semicondutores (efeito fotovoltaico)</td><td>Placas solares, fotocélulas de iluminação pública</td></tr>
         <tr><td><strong>Mecânica (atrito)</strong></td><td>O atrito separa cargas (eletricidade estática)</td><td>Geradores eletrostáticos de laboratório</td></tr>
       </table>
+
+      <figure class="diagrama"><img src="assets/img/diagramas/fontes-tensao.svg" alt="Seis formas de gerar tensão: química, magnética, térmica, pressão, luminosa e atrito" loading="lazy"><figcaption>As seis formas de gerar uma diferença de potencial.</figcaption></figure>
 
       <h2>A mais importante: magnética</h2>
       <p>Quase toda a energia que chega às casas e fábricas vem de <strong>geradores</strong> movidos por água (hidrelétricas), vapor
