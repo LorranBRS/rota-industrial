@@ -88,7 +88,7 @@ window.ROTA = {
       titulo: "Segurança em Eletricidade",
       nivel: "Iniciante",
       cargaHoraria: "8h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "Riscos elétricos, EPIs e EPCs, desenergização e bloqueio. Base introdutória aos conceitos da NR-10.",
       modulos: [
         { titulo: "Riscos elétricos", aulas: ["Choque elétrico e seus efeitos", "Arco elétrico e queimaduras", "Incêndios de origem elétrica"] },

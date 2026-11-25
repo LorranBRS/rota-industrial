@@ -945,6 +945,104 @@ tx += t(500, 208, "Prioridade alta:", RED, anc="start", peso="800", tam=13) + t(
 tx += t(330, 310, "Imagem térmica ilustrativa de três disjuntores com a mesma carga.", MUTED, tam=12)
 arquivos["com-termografia"] = svg(690, 325, (b, tx))
 
+# ===================== SEGURANÇA EM ELETRICIDADE =====================
+# 1. efeitos da corrente no corpo (escala logarítmica, valores aproximados)
+def xm(ma):
+    return 40 + 120 * math.log10(ma / 0.1)
+faixas = [(0.1, 0.5, "#d9f2e3", "não sente"), (0.5, 10, "#a8dcbc", "formigamento, susto"), (10, 30, "#ffd591", "contração muscular, pode não conseguir soltar"),
+          (30, 1000, "#f4a29a", "risco de fibrilação cardíaca"), (1000, 10000, "#c0392b", "queimaduras graves, parada cardíaca")]
+b, tx = "", ""
+for i, (a, z, cor, txt) in enumerate(faixas):
+    tx += f'<rect x="{xm(a):.1f}" y="70" width="{xm(z)-xm(a):.1f}" height="44" fill="{cor}"/>'
+for ma, lbl in ((0.5, "0,5"), (10, "10"), (30, "30"), (1000, "1.000")):
+    b += f'<line x1="{xm(ma):.1f}" y1="64" x2="{xm(ma):.1f}" y2="120" stroke="{INK}" stroke-width="1.5"/>'
+    tx += t(xm(ma), 138, lbl + " mA", peso="700", tam=12)
+desc = [(xm(0.22), 175, "não sente", "middle"), (xm(2.2), 200, "formigamento, susto", "middle"),
+        (xm(17), 225, "contração muscular: pode não conseguir largar", "middle"), (xm(170), 250, "risco de fibrilação ventricular", "middle"),
+        (xm(3200), 275, "queimaduras graves, parada", "end")]
+for x, y, s, anc in desc:
+    b += f'<line x1="{x:.1f}" y1="118" x2="{x:.1f}" y2="{y-14}" stroke="{MUTED}" stroke-width="1" stroke-dasharray="3 3"/>'
+    tx += t(x + (14 if anc == "end" else 0), y, s, anc=anc, peso="600", tam=12)
+b += f'<line x1="{xm(30):.1f}" y1="30" x2="{xm(30):.1f}" y2="70" stroke="{BLUE}" stroke-width="3"/>'
+tx += t(xm(30), 24, "DR de 30 mA: desliga antes da faixa de fibrilação", BLUE, peso="800", tam=13)
+tx += t(340, 310, "Valores aproximados, corrente alternada 60 Hz, adulto. O tempo de passagem também conta.", MUTED, tam=12)
+arquivos["seg-efeitos-corrente"] = svg(690, 325, (b, tx))
+
+# 2. tensão de toque e tensão de passo
+def boneco(x, ypé, braco=None, pernas=18):
+    yq = ypé - 45; yo = ypé - 85; yc = ypé - 100
+    s = f'<circle cx="{x}" cy="{yc}" r="12" fill="#fff"/>' + L((x, yc+12), (x, yq))
+    s += L((x, yq), (x - pernas, ypé)) + L((x, yq), (x + pernas, ypé))
+    s += L((x, yo), braco) if braco else L((x, yo), (x - 18, yo + 30))
+    s += L((x, yo), (x + 18, yo + 30)) if not braco or braco[0] < x else L((x, yo), (x - 18, yo + 30))
+    return s
+b = f'<line x1="10" y1="250" x2="660" y2="250" stroke="{MUTED}" stroke-width="3"/>'
+b += f'<rect x="40" y="150" width="80" height="100" rx="6" fill="#e9ecf0"/>' + boneco(190, 250, braco=(120, 175))
+b += fio([(70, 150), (70, 110), (20, 110)], RED)
+tx = t(80, 205, "máquina", peso="700", tam=12) + t(80, 221, "com falha", RED, peso="700", tam=12)
+tx += f'<polygon points="80,165 88,180 72,180" fill="{ORANGE}"/>'
+tx += seta2(225, 172, 225, 246) + t(232, 214, "tensão de", RED, anc="start", peso="700", tam=12) + t(232, 229, "toque", RED, anc="start", peso="700", tam=12)
+tx += t(150, 290, "Mão na carcaça energizada, pés no chão.", tam=12)
+for r in (25, 55, 90, 130):
+    b += f'<path d="M {470-r} 250 A {r} {r*0.35} 0 0 1 {470+r} 250" stroke="{ORANGE}" stroke-width="1.5" stroke-dasharray="5 4"/>'
+b += fio([(390, 120), (430, 120), (470, 248)], RED) + f'<circle cx="470" cy="248" r="5" fill="{RED}"/>'
+b += boneco(590, 250, pernas=32)
+tx += seta2(558, 262, 622, 262) + t(590, 282, "tensão de passo", RED, peso="700", tam=12)
+tx += t(470, 108, "cabo caído", RED, peso="700", tam=12) + t(470, 310, "A tensão no solo cai com a distância.", tam=12)
+tx += t(470, 326, "Afaste-se com passos curtos, pés juntos.", peso="700", tam=12)
+b += '<line x1="330" y1="40" x2="330" y2="320" stroke="#e2e5ea" stroke-width="2"/>'
+arquivos["seg-toque-passo"] = svg(670, 340, (b, tx))
+
+# 3. sequência de desenergização (NR-10)
+passos = [("1", "Seccionamento", "abrir o circuito"), ("2", "Impedimento de", "reenergização (bloqueio)"), ("3", "Constatação da", "ausência de tensão"),
+          ("4", "Aterramento temporário", "com equipotencialização"), ("5", "Proteção dos elementos", "energizados próximos"), ("6", "Sinalização de", "impedimento de religação")]
+b, tx = "", ""
+for i, (n, l1, l2) in enumerate(passos):
+    col, lin = i % 3, i // 3
+    x, y = 20 + col * 225, 40 + lin * 130
+    tx += f'<rect x="{x}" y="{y}" width="200" height="90" rx="12" fill="#f6f7f9" stroke="{INK}" stroke-width="2"/>'
+    tx += f'<circle cx="{x+100}" cy="{y+22}" r="14" fill="{ORANGE}"/>' + t(x + 100, y + 28, n, "#fff", peso="800", tam=14)
+    tx += t(x + 100, y + 56, l1, peso="700", tam=13) + t(x + 100, y + 74, l2, MUTED, tam=12)
+    if col < 2:
+        tx += seta(x + 204, y + 45, x + 220, y + 45)
+tx += f'<path d="M 570 130 L 570 150 L 120 150 L 120 166" fill="none" stroke="{BLUE}" stroke-width="2" marker-end="url(#sa)"/>'
+tx += t(345, 285, "Só depois dos 6 passos a instalação é considerada desenergizada (NR-10, item 10.5.1).", peso="700", tam=13)
+arquivos["seg-desenergizacao"] = svg(690, 300, (b, tx))
+
+# 4. bloqueio e etiquetagem
+b = f'<rect x="40" y="40" width="160" height="230" rx="12" fill="#e9ecf0"/>'
+b += f'<rect x="85" y="80" width="70" height="110" rx="8" fill="#fff"/>' + f'<rect x="100" y="150" width="40" height="30" rx="4" fill="{INK}"/>'
+tx = t(120, 110, "OFF", peso="800", tam=16) + t(120, 28, "seccionadora (desligada)", MUTED, tam=12)
+b += f'<path d="M 120 180 L 120 215" stroke-width="5"/><rect x="95" y="212" width="50" height="70" rx="10" fill="#fff" stroke-width="4"/>'
+for k in range(3):
+    b += f'<circle cx="{107 + k*13}" cy="265" r="4" fill="#fff"/>'
+for k, (cor, nome) in enumerate(((RED, "Ana"), (BLUE, "Bruno"), (GREEN, "Carla"))):
+    x = 230 + k * 95
+    b += fio([(107 + k*13, 265), (107 + k*13, 300), (x + 25, 300), (x + 25, 318)], MUTED, 2)
+    b += f'<path d="M {x+12} 335 L {x+12} 322 A 13 13 0 0 1 {x+38} 322 L {x+38} 335" stroke-width="4"/>'
+    tx += f'<rect x="{x}" y="333" width="50" height="45" rx="6" fill="{cor}"/>' + t(x + 25, 362, nome, "#fff", peso="700", tam=12)
+b += f'<line x1="300" y1="60" x2="160" y2="215" stroke="{MUTED}" stroke-width="1.5"/>'
+tx += f'<rect x="300" y="40" width="250" height="170" rx="8" fill="#fff4f2" stroke="{RED}" stroke-width="2.5"/>'
+tx += t(425, 70, "PERIGO", RED, peso="800", tam=20) + t(425, 94, "NÃO LIGUE", RED, peso="800", tam=15)
+for k, (a, z) in enumerate((("Responsável:", "Ana Souza"), ("Motivo:", "troca do motor M2"), ("Data:", "25/11"), ("Contato:", "manutenção"))):
+    tx += t(318, 125 + k * 22, a, MUTED, anc="start", tam=12) + t(410, 125 + k * 22, z, anc="start", peso="700", tam=12)
+tx += t(450, 240, "garra múltipla: a chave só religa", peso="700", tam=12, anc="middle") + t(450, 256, "quando o último cadeado sair", peso="700", tam=12)
+tx += t(330, 405, "Cada trabalhador põe o seu cadeado e guarda a sua chave.", peso="700", tam=13)
+arquivos["seg-loto"] = svg(600, 420, (b, tx))
+
+# 5. RCP — compressões torácicas
+b = f'<path d="M 60 300 L 60 120 Q 60 70 110 62 L 150 55 Q 175 40 200 55 L 240 62 Q 290 70 290 120 L 290 300 Z" fill="#f6f7f9"/>'
+b += f'<line x1="175" y1="95" x2="175" y2="215" stroke="{MUTED}" stroke-width="2" stroke-dasharray="5 4"/>'
+b += f'<ellipse cx="175" cy="185" rx="34" ry="22" fill="{ORANGE}" fill-opacity=".85" stroke="{INK}" stroke-width="2"/>'
+tx = t(175, 330, "mãos sobrepostas no centro do peito", peso="700", tam=12) + t(175, 346, "(metade inferior do esterno)", MUTED, tam=12)
+for k, (a, z) in enumerate((("100 a 120", "compressões por minuto"), ("5 a 6 cm", "de profundidade (adulto)"), ("Deixe o peito voltar", "entre uma compressão e outra"),
+                            ("30 : 2", "se treinado; senão, só compressões"), ("Peça o DEA", "e use assim que chegar"))):
+    y = 60 + k * 58
+    tx += f'<rect x="330" y="{y}" width="300" height="48" rx="8" fill="#fff" stroke="#cfd5dd" stroke-width="1.5"/>'
+    tx += t(345, y + 21, a, RED if k < 2 else INK, anc="start", peso="800", tam=14) + t(345, y + 38, z, MUTED, anc="start", tam=12)
+tx += t(330, 30, "Ligue 192 (SAMU) antes de começar", BLUE, peso="800", tam=14, anc="start")
+arquivos["seg-rcp"] = svg(660, 365, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")
