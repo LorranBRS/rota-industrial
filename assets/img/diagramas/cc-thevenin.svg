@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 530 300" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="530" height="300" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<polyline points="60,60 60,137"/><line x1="38" y1="137" x2="82" y2="137"/><line x1="49" y1="153" x2="71" y2="153" stroke-width="6"/><polyline points="60,153 60,230"/><polyline points="60,60 110,60"/><rect x="110.0" y="46.0" width="70" height="28" fill="#fff"/><polyline points="180,60 380,60 380,110"/><rect x="366.0" y="110.0" width="28" height="70" fill="#fff"/><polyline points="380,180 380,230 60,230"/><line x1="250" y1="42" x2="330" y2="42" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/><rect x="10" y="22" width="250" height="232" rx="10" stroke="#e08a00" stroke-width="2" stroke-dasharray="6 5"/>
+</g>
+<g fill="#1b1f24">
+<text x="90" y="135" font-weight="700">+</text><text x="90" y="163" font-weight="700">−</text><text x="30" y="150" text-anchor="end" font-weight="700" fill="#c0392b">15 V</text><text x="30" y="125" text-anchor="end" fill="#c0392b" font-weight="700" font-size="15">Vth</text><text x="145" y="95" text-anchor="middle" fill="#1b1f24" font-weight="600" font-size="15">Rth = 1 Ω</text><circle cx="290" cy="60" r="6" fill="#fff" stroke="#1b1f24" stroke-width="2"/><circle cx="290" cy="230" r="6" fill="#fff" stroke="#1b1f24" stroke-width="2"/><text x="290" y="85" text-anchor="middle" fill="#1b1f24" font-weight="800" font-size="15">A</text><text x="290" y="215" text-anchor="middle" fill="#1b1f24" font-weight="800" font-size="15">B</text><text x="402" y="150" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">R3 = 4 Ω</text><text x="290" y="32" text-anchor="middle" fill="#1f5fa8" font-weight="700" font-size="15">I = 3 A</text><text x="135" y="248" text-anchor="middle" fill="#e08a00" font-weight="700" font-size="13">equivalente de Thévenin</text><text x="245" y="285" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="15">I = Vth / (Rth + R3) = 15 / (1 + 4) = 3 A</text>
+</g>
+</svg>

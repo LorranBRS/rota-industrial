@@ -103,7 +103,7 @@ window.ROTA = {
       titulo: "Análise de Circuitos em Corrente Contínua",
       nivel: "Intermediário",
       cargaHoraria: "16h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "Kirchhoff, malhas, superposição, Thévenin, Norton e ponte de Wheatstone, com exercícios resolvidos.",
       modulos: [
         { titulo: "Leis de Kirchhoff", aulas: ["Lei dos nós (correntes)", "Lei das malhas (tensões)", "Circuitos com mais de uma fonte"] },

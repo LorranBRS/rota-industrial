@@ -255,6 +255,93 @@ b += f'<line x1="{cx-50}" y1="{cy-34}" x2="{cx+50}" y2="{cy-34}" stroke="{ORANGE
 tx += t(cx-33, cy+7, "+ +", RED, peso="800", tam=18) + t(cx+33, cy+7, "− −", BLUE, peso="800", tam=18)
 arquivos["fontes-tensao"] = svg(730, 345, (b, tx))
 
+# ===== Curso: Análise de Circuitos em CC =====
+# Circuito de referência: E1 = 20 V, R1 = 2 Ω, R3 = 4 Ω, R2 = 2 Ω, E2 = 10 V → VA = 12 V; I1 = 4 A, I3 = 3 A, I2 = 1 A
+def duas_fontes():
+    b = (bat(60, 70, 240, 155) + L((60, 70), (125, 70)) + rh(160, 70) + L((195, 70), (405, 70)) + rh(440, 70)
+         + L((475, 70), (540, 70)) + bat(540, 70, 240, 155) + L((300, 70), (300, 120)) + rv(300, 155)
+         + L((300, 190), (300, 240)) + L((60, 240), (540, 240)))
+    tx = batlbl(60, 155, "20 V") + t(30, 135, "E1", RED, anc="end", peso="700") + batlbl(540, 155, "10 V") + t(510, 135, "E2", RED, anc="end", peso="700")
+    tx += dot(300, 70) + dot(300, 240) + t(160, 45, "R1 = 2 Ω", peso="600") + t(440, 45, "R2 = 2 Ω", peso="600")
+    tx += t(322, 160, "R3 = 4 Ω", anc="start", peso="600") + t(308, 60, "A", anc="start", peso="800") + t(308, 262, "B", anc="start", peso="800")
+    return b, tx
+
+b, tx = duas_fontes()
+b += seta(130, 95, 190, 95) + seta(410, 95, 470, 95) + seta(278, 125, 278, 185)
+tx += t(160, 118, "I1 = 4 A", BLUE, peso="700") + t(440, 118, "I2 = 1 A", BLUE, peso="700") + t(272, 160, "I3 = 3 A", BLUE, anc="end", peso="700")
+tx += t(300, 280, "VA = 12 V · a fonte E2 está RECEBENDO 1 A (sendo carregada)", MUTED, tam=13)
+arquivos["cc-duas-fontes"] = svg(600, 295, (b, tx))
+
+def arco(cx, cy, r=26):
+    return f'<path d="M {cx-r} {cy} A {r} {r} 0 1 1 {cx} {cy+r}" stroke="{ORANGE}" stroke-width="2.5" marker-end="url(#so)"/>'
+b, tx = duas_fontes()
+b += arco(180, 165) + arco(420, 165)
+tx += t(180, 171, "Ia", ORANGE, peso="800", tam=17) + t(420, 171, "Ib", ORANGE, peso="800", tam=17)
+tx += t(300, 280, "Correntes de malha no sentido horário: Ia = 4 A, Ib = 1 A · em R3: Ia − Ib = 3 A", MUTED, tam=13)
+arquivos["cc-malhas"] = svg(600, 295, (b, tx)).replace("</defs>", f'<marker id="so" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="{ORANGE}"/></marker></defs>')
+
+# Thévenin equivalente
+b = (bat(60, 60, 230, 145) + L((60, 60), (110, 60)) + rh(145, 60) + L((180, 60), (380, 60), (380, 110)) + rv(380, 145)
+     + L((380, 180), (380, 230), (60, 230)) + seta(250, 42, 330, 42)
+     + f'<rect x="10" y="22" width="250" height="232" rx="10" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 5"/>')
+tx = batlbl(60, 145, "15 V") + t(30, 125, "Vth", RED, anc="end", peso="700") + t(145, 95, "Rth = 1 Ω", peso="600")
+tx += f'<circle cx="290" cy="60" r="6" fill="#fff" stroke="{INK}" stroke-width="2"/><circle cx="290" cy="230" r="6" fill="#fff" stroke="{INK}" stroke-width="2"/>'
+tx += t(290, 85, "A", peso="800") + t(290, 215, "B", peso="800") + t(402, 150, "R3 = 4 Ω", anc="start", peso="600")
+tx += t(290, 32, "I = 3 A", BLUE, peso="700") + t(135, 248, "equivalente de Thévenin", ORANGE, peso="700", tam=13)
+tx += t(245, 285, "I = Vth / (Rth + R3) = 15 / (1 + 4) = 3 A", peso="700", tam=15)
+arquivos["cc-thevenin"] = svg(500, 300, (b, tx))
+
+# Norton equivalente
+b = (L((70, 60), (70, 121)) + L((70, 169), (70, 230)) + f'<circle cx="70" cy="145" r="24" fill="#fff"/>'
+     + f'<line x1="70" y1="160" x2="70" y2="130" stroke-width="2.5" marker-end="url(#sk)"/>'
+     + L((70, 60), (390, 60), (390, 110)) + rv(390, 145) + L((390, 180), (390, 230), (70, 230))
+     + L((190, 60), (190, 110)) + rv(190, 145) + L((190, 180), (190, 230)) + seta(366, 115, 366, 175)
+     + f'<rect x="20" y="22" width="250" height="232" rx="10" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 5"/>')
+tx = dot(190, 60) + dot(190, 230) + t(105, 140, "IN", BLUE, anc="start", peso="700") + t(105, 160, "15 A", BLUE, anc="start", peso="700")
+tx += t(212, 150, "RN = 1 Ω", anc="start", peso="600") + t(412, 140, "R3 = 4 Ω", anc="start", peso="600") + t(412, 162, "I3 = 3 A", BLUE, anc="start", peso="700")
+tx += f'<circle cx="300" cy="60" r="6" fill="#fff" stroke="{INK}" stroke-width="2"/><circle cx="300" cy="230" r="6" fill="#fff" stroke="{INK}" stroke-width="2"/>'
+tx += t(300, 85, "A", peso="800") + t(300, 215, "B", peso="800") + t(145, 248, "equivalente de Norton", ORANGE, peso="700", tam=13)
+tx += t(250, 285, "I3 = IN × RN / (RN + R3) = 15 × 1 / 5 = 3 A", peso="700", tam=15)
+arquivos["cc-norton"] = svg(510, 300, (b, tx)).replace("</defs>", f'<marker id="sk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="{INK}"/></marker></defs>')
+
+# Ponte de Wheatstone
+T, Lf, Rt, Bt = (230, 60), (110, 175), (350, 175), (230, 290)
+def rdiag(p1, p2, nome):
+    mx, my = (p1[0]+p2[0])/2, (p1[1]+p2[1])/2
+    ang = math.degrees(math.atan2(p2[1]-p1[1], p2[0]-p1[0]))
+    return L(p1, p2) + f'<g transform="translate({mx},{my}) rotate({ang:.1f})"><rect x="-30" y="-12" width="60" height="24" fill="#fff"/></g>'
+b = rdiag(T, Lf, "R1") + rdiag(Lf, Bt, "R2") + rdiag(T, Rt, "R3") + rdiag(Rt, Bt, "Rx")
+b += L(Lf, (206, 175)) + L((254, 175), Rt) + f'<circle cx="230" cy="175" r="24" fill="#fff" stroke="{ORANGE}" stroke-width="3"/>'
+b += L(T, (230, 25), (30, 25), (30, 160)) + L((30, 176), (30, 325), (230, 325), Bt)
+b += '<line x1="8" y1="160" x2="52" y2="160"/><line x1="19" y1="176" x2="41" y2="176" stroke-width="6"/>'
+tx = dot(*T) + dot(*Lf) + dot(*Rt) + dot(*Bt) + t(230, 182, "G", ORANGE, peso="800", tam=20)
+tx += t(0, 172, "E", RED, anc="end", peso="700") + t(58, 158, "+", anc="start", peso="700") + t(58, 186, "−", anc="start", peso="700")
+tx += t(155, 105, "R1", anc="end", peso="700") + t(305, 105, "R3", anc="start", peso="700")
+tx += t(155, 255, "R2", anc="end", peso="700") + t(305, 255, "Rx", anc="start", peso="700")
+tx += t(230, 355, "Equilíbrio (G marca zero): R1 / R2 = R3 / Rx", peso="700", tam=15)
+arquivos["cc-wheatstone"] = svg(460, 370, (b, tx))
+
+# Máxima transferência de potência: P(RL) = 225·RL/(1+RL)²
+x0, y0, sx, sy = 70, 250, 75, 200/60
+pts = " ".join(f"{x0 + r*sx:.1f},{y0 - 225*r/(1+r)**2*sy:.1f}" for r in [i/50 for i in range(0, 301)])
+b = (f'<line x1="{x0}" y1="{y0}" x2="{x0+6*sx+10}" y2="{y0}" stroke="{MUTED}" stroke-width="1.5"/>'
+     f'<line x1="{x0}" y1="{y0}" x2="{x0}" y2="40" stroke="{MUTED}" stroke-width="1.5"/>'
+     f'<polyline points="{pts}" stroke="{BLUE}" stroke-width="3"/>'
+     f'<line x1="{x0+sx}" y1="{y0}" x2="{x0+sx}" y2="{y0-56.25*sy:.1f}" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="5 4"/>')
+tx = "".join(t(x0 + r*sx, y0+20, str(r), MUTED, tam=12) for r in range(7))
+tx += "".join(t(x0-8, y0 - p*sy + 4, str(p), MUTED, anc="end", tam=12) for p in (0, 20, 40, 60))
+tx += f'<circle cx="{x0+sx}" cy="{y0-56.25*sy:.1f}" r="6" fill="{ORANGE}"/>'
+tx += t(x0+sx+12, y0-56.25*sy-8, "Pmáx = 56,25 W com RL = Rth = 1 Ω", ORANGE, anc="start", peso="700", tam=14)
+tx += t(x0 + 3*sx, y0+42, "Resistência da carga RL (Ω)", peso="600", tam=13) + t(x0-45, 30, "P na carga (W)", anc="start", peso="600", tam=13)
+arquivos["cc-max-potencia"] = svg(560, 305, (b, tx))
+
+# Lei dos nós
+b = (seta(50, 130, 196, 130) + seta(222, 122, 340, 50) + seta(226, 130, 380, 130) + seta(222, 138, 340, 210))
+tx = dot(210, 130) + f'<circle cx="210" cy="130" r="9" fill="{INK}"/>' + t(110, 118, "10 A (entra)", BLUE, peso="700")
+tx += t(350, 48, "3 A", BLUE, anc="start", peso="700") + t(390, 135, "4 A", BLUE, anc="start", peso="700") + t(350, 220, "I = ?", ORANGE, anc="start", peso="800")
+tx += t(210, 262, "O que entra = o que sai: 10 = 3 + 4 + I → I = 3 A", peso="700", tam=15)
+arquivos["cc-lei-dos-nos"] = svg(440, 280, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")

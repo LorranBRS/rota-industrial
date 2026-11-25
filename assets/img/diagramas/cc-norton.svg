@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 540 300" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+<marker id="sk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#1b1f24"/></marker></defs>
+<rect x="-30" width="540" height="300" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<polyline points="70,60 70,121"/><polyline points="70,169 70,230"/><circle cx="70" cy="145" r="24" fill="#fff"/><line x1="70" y1="160" x2="70" y2="130" stroke-width="2.5" marker-end="url(#sk)"/><polyline points="70,60 390,60 390,110"/><rect x="376.0" y="110.0" width="28" height="70" fill="#fff"/><polyline points="390,180 390,230 70,230"/><polyline points="190,60 190,110"/><rect x="176.0" y="110.0" width="28" height="70" fill="#fff"/><polyline points="190,180 190,230"/><line x1="366" y1="115" x2="366" y2="175" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/><rect x="20" y="22" width="250" height="232" rx="10" stroke="#e08a00" stroke-width="2" stroke-dasharray="6 5"/>
+</g>
+<g fill="#1b1f24">
+<circle cx="190" cy="60" r="4.5" fill="#1b1f24"/><circle cx="190" cy="230" r="4.5" fill="#1b1f24"/><text x="105" y="140" text-anchor="start" fill="#1f5fa8" font-weight="700" font-size="15">IN</text><text x="105" y="160" text-anchor="start" fill="#1f5fa8" font-weight="700" font-size="15">15 A</text><text x="212" y="150" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">RN = 1 Ω</text><text x="412" y="140" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">R3 = 4 Ω</text><text x="412" y="162" text-anchor="start" fill="#1f5fa8" font-weight="700" font-size="15">I3 = 3 A</text><circle cx="300" cy="60" r="6" fill="#fff" stroke="#1b1f24" stroke-width="2"/><circle cx="300" cy="230" r="6" fill="#fff" stroke="#1b1f24" stroke-width="2"/><text x="300" y="85" text-anchor="middle" fill="#1b1f24" font-weight="800" font-size="15">A</text><text x="300" y="215" text-anchor="middle" fill="#1b1f24" font-weight="800" font-size="15">B</text><text x="145" y="248" text-anchor="middle" fill="#e08a00" font-weight="700" font-size="13">equivalente de Norton</text><text x="250" y="285" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="15">I3 = IN × RN / (RN + R3) = 15 × 1 / 5 = 3 A</text>
+</g>
+</svg>
