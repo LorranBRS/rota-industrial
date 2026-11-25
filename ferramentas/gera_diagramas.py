@@ -835,6 +835,116 @@ tx += t(88, 82, "pontas 1-2-3 (ou todas)", MUTED, anc="start", tam=11) + t(88, 9
 tx += t(250, 265, "Isolação entre enrolamento e carcaça: motor desligado e desconectado.", peso="700", tam=13)
 arquivos["mot-megometro"] = svg(530, 280, (b, tx))
 
+# ===================== INSTALAÇÕES COMERCIAIS =====================
+# 1. sistema trifásico em estrela com neutro (220/127 V)
+cx, cy = 130, 170
+b, tx = "", ""
+pontas = []
+for k in range(3):
+    a = math.radians(-90 + 120 * k)
+    px, py = cx + 90 * math.cos(a), cy + 90 * math.sin(a)
+    pontas.append((px, py))
+    bb, tt = bobina_rot(cx, cy, px, py, (0, 0, "")); b += bb
+(ax, ay), (bx, by), (cx2, cy2) = pontas
+b += fio([(ax, ay), (ax, 60), (520, 60)], RED)
+b += fio([(bx, by), (270, by), (270, 110), (520, 110)], BLUE)
+b += fio([(cx2, cy2), (cx2, 300), (520, 300)], ORANGE)
+b += fio([(cx, cy), (cx, 250), (520, 250)], MUTED)
+tx += dot(cx, cy) + "".join(dot(px, py) for px, py in pontas)
+for y, n, cor in ((60, "Fase A", RED), (110, "Fase B", BLUE), (250, "Neutro", MUTED), (300, "Fase C", ORANGE)):
+    tx += t(530, y + 5, n, cor, anc="start", peso="700", tam=13)
+tx += seta2(420, 64, 420, 106) + t(412, 90, "220 V", RED, anc="end", peso="800", tam=13) + t(412, 76, "linha (entre fases)", MUTED, anc="end", tam=11)
+tx += seta2(420, 254, 420, 296) + t(412, 280, "127 V", RED, anc="end", peso="800", tam=13) + t(412, 266, "fase (fase-neutro)", MUTED, anc="end", tam=11)
+tx += t(cx + 16, cy - 8, "N", peso="800", tam=13, anc="start")
+tx += t(310, 345, "Secundário do transformador em estrela: 220 ÷ 127 = √3 ≈ 1,73", peso="800", tam=14)
+arquivos["com-trifasico"] = svg(620, 365, (b, tx))
+
+# 2. equilíbrio de fases (antes x depois)
+def barras_fase(dx, vals, tit):
+    b, tx = "", ""
+    base, esc = 250, 0.042
+    for i, (f, v, cor) in enumerate(zip("ABC", vals, (RED, BLUE, ORANGE))):
+        x = dx + 30 + i * 70
+        h = v * esc
+        tx += f'<rect x="{x}" y="{base-h:.1f}" width="46" height="{h:.1f}" rx="4" fill="{cor}"/>' + t(x + 23, base - h - 8, f"{v:,}".replace(",", "."), peso="700", tam=12)
+        tx += t(x + 23, base + 20, f"Fase {f}", peso="700", tam=12)
+    media = sum(vals) / 3
+    b += f'<line x1="{dx+20}" y1="{base-media*esc:.1f}" x2="{dx+236}" y2="{base-media*esc:.1f}" stroke="{INK}" stroke-width="1.5" stroke-dasharray="6 4"/>'
+    b += f'<line x1="{dx+20}" y1="{base}" x2="{dx+236}" y2="{base}" stroke="{MUTED}" stroke-width="2"/>'
+    tx += t(dx + 128, 30, tit, peso="800", tam=15)
+    return b, tx
+b1, t1 = barras_fase(0, (3280, 4680, 4200), "Antes (VA por fase)")
+b2, t2 = barras_fase(300, (4080, 3880, 4200), "Depois (C7 → fase A)")
+tx = t1 + t2 + t(280, 300, "Tracejado = média (≈ 4.053 VA). Depois da troca, nenhuma fase se afasta mais de 4,3 % da média.", MUTED, tam=12)
+arquivos["com-equilibrio"] = svg(560, 315, (b1 + b2 + '<line x1="280" y1="40" x2="280" y2="270" stroke="#e2e5ea" stroke-width="2"/>', tx))
+
+# 3. padrão de entrada (blocos)
+def caixa(x, y, w, h, l1, l2, cor="#fff"):
+    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{cor}" stroke="{INK}" stroke-width="2"/>'
+            + t(x + w/2, y + h/2 - 2, l1, peso="700", tam=13) + t(x + w/2, y + h/2 + 15, l2, MUTED, tam=11))
+b = fio([(20, 90), (80, 90)], RED) + fio([(200, 90), (230, 90)], RED) + fio([(350, 90), (380, 90)], RED) + fio([(500, 90), (530, 90)], RED)
+b += fio([(440, 125), (440, 190)], GREEN) + '<line x1="420" y1="190" x2="460" y2="190"/><line x1="427" y1="198" x2="453" y2="198"/><line x1="434" y1="206" x2="446" y2="206"/>'
+tx = t(20, 75, "rede", RED, anc="start", peso="700", tam=12)
+tx += caixa(80, 55, 120, 70, "Ramal de ligação", "da concessionária")
+tx += caixa(230, 55, 120, 70, "Medidor", "caixa padronizada")
+tx += caixa(380, 55, 120, 70, "Disjuntor geral", "+ BEP / aterramento")
+tx += caixa(530, 55, 110, 70, "QDG", "quadro geral", "#f6f7f9")
+tx += t(470, 222, "haste(s) de aterramento", MUTED, anc="start", tam=12)
+b += f'<line x1="215" y1="46" x2="215" y2="150" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 5"/>'
+tx += t(215, 18, "ponto de entrega", ORANGE, peso="800", tam=12) + t(205, 40, "rede", ORANGE, anc="end", tam=11) + t(225, 40, "instalação do cliente", ORANGE, anc="start", tam=11)
+tx += t(330, 260, "Cada concessionária tem seu padrão: siga a norma técnica dela.", peso="700", tam=14)
+arquivos["com-padrao-entrada"] = svg(660, 275, (b, tx))
+
+# 4. layout luminotécnico (salão 10 × 10 m, 5 × 6 luminárias)
+b = '<rect x="40" y="40" width="300" height="300" stroke-width="5"/>'
+tx = ""
+for i in range(6):
+    for j in range(5):
+        x = 40 + 25 + i * 50
+        y = 40 + 30 + j * 60
+        tx += f'<rect x="{x-16}" y="{y-6}" width="32" height="12" rx="3" fill="#fff7e6" stroke="{ORANGE}" stroke-width="2"/>'
+b += f'<line x1="65" y1="365" x2="115" y2="365" stroke="{MUTED}" stroke-width="1.5"/>' + f'<line x1="360" y1="70" x2="360" y2="130" stroke="{MUTED}" stroke-width="1.5"/>'
+tx += t(90, 385, "1,67 m", MUTED, tam=12) + t(368, 104, "2,0 m", MUTED, anc="start", tam=12)
+tx += t(190, 25, "Salão de vendas 10 × 10 m (100 m²)", peso="700", tam=14)
+lx = 420
+tx += f'<rect x="{lx-12}" y="60" width="250" height="250" rx="10" fill="#f6f7f9" stroke="#e2e5ea"/>'
+for k, (a, z) in enumerate((("Iluminância alvo", "500 lux"), ("Luminária LED", "4.000 lm · 32 W"), ("Fator de utilização", "0,6"), ("Fator de manutenção", "0,8"), ("Mínimo calculado", "26,04 → 27"), ("Adotado (grade 5 × 6)", "30 luminárias"), ("Resultado", "≈ 576 lux · 960 W"))):
+    tx += t(lx, 88 + k * 32, a, MUTED, anc="start", tam=12) + t(lx, 104 + k * 32, z, peso="700", anc="start", tam=13)
+arquivos["com-luminotecnico"] = svg(690, 400, (b, tx))
+
+# 5. triângulo de potências
+b = (fio([(60, 260), (420, 260)], BLUE, 4) + fio([(420, 260), (420, 80)], ORANGE, 4) + fio([(60, 260), (420, 80)], RED, 4)
+     + f'<path d="M 130 260 A 70 70 0 0 0 123 229" stroke="{INK}" stroke-width="2"/>'
+     + fio([(420, 260), (420, 120)], GREEN, 4) + f'<line x1="60" y1="260" x2="420" y2="120" stroke="{GREEN}" stroke-width="2.5" stroke-dasharray="7 5"/>')
+tx = t(240, 285, "P = potência ativa (kW) — faz trabalho", BLUE, peso="700", tam=13)
+tx += t(432, 100, "Q = reativa (kvar)", ORANGE, anc="start", peso="700", tam=13) + t(432, 118, "magnetiza motores e reatores", MUTED, anc="start", tam=11)
+tx += t(200, 150, "S = aparente (kVA)", RED, anc="end", peso="700", tam=13)
+tx += t(140, 252, "φ", peso="800", tam=16)
+tx += t(432, 175, "capacitores reduzem Q", GREEN, anc="start", peso="700", tam=12) + t(432, 192, "→ φ menor, cos φ maior", GREEN, anc="start", tam=12)
+tx += t(300, 330, "cos φ = P ÷ S   ·   S² = P² + Q²", peso="800", tam=15)
+arquivos["com-triangulo-potencias"] = svg(640, 345, (b, tx))
+
+# 6. termografia de disjuntores
+def grad(id_, c1, c2):
+    return f'<radialGradient id="{id_}"><stop offset="0" stop-color="{c1}"/><stop offset="1" stop-color="{c2}"/></radialGradient>'
+b = f'<defs>{grad("gq", "#fff3b0", "#d7301f")}{grad("gm", "#fdae61", "#4b2991")}{grad("gf", "#7b3fa0", "#2c1160")}</defs>'
+b += '<rect x="30" y="30" width="360" height="250" rx="10" fill="#1e0b3a" stroke="none"/>'
+tx = ""
+for i, (gid, temp) in enumerate((("gm", "38,2 °C"), ("gq", "71,5 °C"), ("gm", "39,0 °C"))):
+    x = 70 + i * 105
+    b += f'<rect x="{x}" y="70" width="70" height="150" rx="6" fill="url(#gf)" stroke="none"/>'
+    b += f'<ellipse cx="{x+35}" cy="90" rx="34" ry="24" fill="url(#{gid})" stroke="none"/>'
+    tx += t(x + 35, 245, temp, "#ffffff", peso="800", tam=14) + t(x + 35, 262, ["Fase A", "Fase B", "Fase C"][i], "#c9c2e0", tam=11)
+tx += f'<circle cx="210" cy="90" r="6" fill="none" stroke="#fff" stroke-width="2"/>'
+b += '<rect x="410" y="40" width="18" height="230" rx="4" fill="url(#lin)" stroke="none"/>'
+b = b.replace("</defs>", '<linearGradient id="lin" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#2c1160"/><stop offset=".5" stop-color="#d7301f"/><stop offset="1" stop-color="#fff3b0"/></linearGradient></defs>')
+tx += t(436, 50, "quente", anc="start", tam=12) + t(436, 270, "frio", anc="start", tam=12)
+tx += t(500, 110, "ΔT = 71,5 − 38,6", ORANGE, anc="start", peso="800", tam=14) + t(500, 130, "≈ 33 °C (vs. média de A e C)", ORANGE, anc="start", peso="700", tam=13)
+tx += t(500, 160, "Provável mau contato", anc="start", peso="700", tam=13) + t(500, 178, "no borne da fase B", anc="start", tam=13)
+tx += t(500, 208, "Prioridade alta:", RED, anc="start", peso="800", tam=13) + t(500, 226, "programar reaperto/troca", RED, anc="start", tam=13)
+tx += t(330, 310, "Imagem térmica ilustrativa de três disjuntores com a mesma carga.", MUTED, tam=12)
+arquivos["com-termografia"] = svg(690, 325, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")

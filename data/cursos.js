@@ -135,7 +135,7 @@ window.ROTA = {
       titulo: "Instalações Elétricas Comerciais",
       nivel: "Intermediário",
       cargaHoraria: "16h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "Lojas e escritórios: sistemas trifásicos, iluminação, quadros maiores e eficiência energética.",
       modulos: [
         { titulo: "Sistema trifásico", aulas: ["Ligação estrela e triângulo", "Equilíbrio de fases", "Padrão de entrada"] },
