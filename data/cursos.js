@@ -47,19 +47,38 @@ window.ROTA = {
 
   cursos: [
     {
+      id: "matematica-eletricistas",
+      area: "eletrica",
+      setores: ["residencial", "comercial", "industrial"],
+      titulo: "Matemática para Eletricistas",
+      nivel: "Iniciante",
+      cargaHoraria: "10h",
+      status: "em-breve",
+      resumo: "A matemática que o eletricista usa de verdade: decimais, frações, potências, prefixos (k, m, µ), regra de três e porcentagem.",
+      modulos: [
+        { titulo: "Números e operações", aulas: ["Conjuntos numéricos", "Números decimais e arredondamento", "Frações na prática"] },
+        { titulo: "Potências e prefixos", aulas: ["Potenciação e radiciação", "Notação científica", "Prefixos do SI: quilo, mega, mili, micro"] },
+        { titulo: "Proporções", aulas: ["Razão e proporção", "Regra de três simples", "Porcentagem"] },
+        { titulo: "Fórmulas e medições", aulas: ["Isolando uma variável na fórmula", "Algarismos significativos na leitura de instrumentos"] }
+      ]
+    },
+    {
       id: "fundamentos-eletricidade",
       area: "eletrica",
       setores: ["residencial", "comercial", "industrial"],
       titulo: "Fundamentos de Eletricidade",
       nivel: "Iniciante",
-      cargaHoraria: "12h",
-      status: "em-breve",
-      resumo: "Tensão, corrente, resistência, potência e Lei de Ohm, com exemplos do dia a dia.",
+      cargaHoraria: "20h",
+      status: "disponivel",
+      resumo: "Da carga elétrica à potência: tensão, corrente, resistência, Leis de Ohm, circuitos série/paralelo e energia.",
       modulos: [
-        { titulo: "O que é eletricidade", aulas: ["Átomo, elétrons e carga elétrica", "Condutores e isolantes", "Corrente contínua x alternada"] },
-        { titulo: "Grandezas elétricas", aulas: ["Tensão (V)", "Corrente (A)", "Resistência (Ω)", "Potência (W) e energia (kWh)"] },
-        { titulo: "Lei de Ohm na prática", aulas: ["Cálculos básicos", "Circuitos série e paralelo", "Exercícios resolvidos"] },
-        { titulo: "Instrumentos de medição", aulas: ["Multímetro: como usar com segurança", "Alicate amperímetro", "Medições comuns em campo"] }
+        { titulo: "Origem da eletricidade", aulas: ["Átomo, elétrons e carga elétrica", "Eletrização dos corpos", "Lei de Coulomb e campo elétrico", "Potencial elétrico e diferença de potencial (DDP)"] },
+        { titulo: "Geração de energia elétrica", aulas: ["Fontes de tensão: química, magnética, térmica, mecânica, luminosa e pressão", "Corrente contínua x alternada"] },
+        { titulo: "Grandezas fundamentais", aulas: ["Corrente elétrica", "Tensão elétrica", "Resistência elétrica", "Condutores e isolantes"] },
+        { titulo: "Leis de Ohm", aulas: ["Primeira Lei de Ohm", "Segunda Lei de Ohm"] },
+        { titulo: "Circuitos elétricos", aulas: ["Resistores", "Circuito em série", "Circuito em paralelo", "Circuito misto"] },
+        { titulo: "Potência e energia", aulas: ["Potência elétrica", "Energia elétrica e consumo (kWh)", "Efeito Joule", "Rendimento"] },
+        { titulo: "Instrumentos de medição", aulas: ["Multímetro: como usar com segurança", "Alicate amperímetro"] }
       ]
     },
     {
@@ -75,6 +94,22 @@ window.ROTA = {
         { titulo: "Riscos elétricos", aulas: ["Choque elétrico e seus efeitos", "Arco elétrico e queimaduras", "Incêndios de origem elétrica"] },
         { titulo: "Medidas de proteção", aulas: ["EPIs e EPCs", "Desenergização passo a passo", "Bloqueio e etiquetagem (LOTO)"] },
         { titulo: "Primeiros socorros", aulas: ["Como agir em um acidente elétrico", "Noções de RCP"] }
+      ]
+    },
+    {
+      id: "analise-circuitos-cc",
+      area: "eletrica",
+      setores: ["comercial", "industrial"],
+      titulo: "Análise de Circuitos em Corrente Contínua",
+      nivel: "Intermediário",
+      cargaHoraria: "16h",
+      status: "em-breve",
+      resumo: "Kirchhoff, malhas, superposição, Thévenin, Norton e ponte de Wheatstone, com exercícios resolvidos.",
+      modulos: [
+        { titulo: "Leis de Kirchhoff", aulas: ["Lei dos nós (correntes)", "Lei das malhas (tensões)", "Circuitos com mais de uma fonte"] },
+        { titulo: "Métodos de resolução", aulas: ["Método das malhas (Maxwell)", "Teorema da superposição"] },
+        { titulo: "Teoremas de equivalência", aulas: ["Teorema de Thévenin", "Teorema de Norton"] },
+        { titulo: "Aplicações", aulas: ["Ponte de Wheatstone", "Máxima transferência de potência"] }
       ]
     },
     {
