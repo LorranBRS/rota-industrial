@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rota Industrial | Cursos de Elétrica</title>
+  <meta name="description" content="Rota Industrial: cursos online de elétrica para os setores industrial, residencial e comercial.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="container">
+      <a class="logo" href="index.html"><span class="logo-icone"><span>RI</span></span> Rota Industrial</a>
+      <button class="menu-botao" aria-label="Abrir menu">☰</button>
+      <nav class="menu">
+        <a href="index.html" class="ativo">Início</a>
+        <a href="cursos.html" >Cursos</a>
+        <a href="sobre.html" >Sobre</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Sua rota para a <em>elétrica profissional</em></h1>
+        <p>Cursos práticos para quem trabalha — ou quer trabalhar — com instalações industriais, residenciais e comerciais. Começando pela área de elétrica.</p>
+        <div class="acoes">
+          <a class="botao botao-primario" href="cursos.html?area=eletrica">Ver cursos de elétrica</a>
+          <a class="botao botao-secundario" href="sobre.html">Conhecer o projeto</a>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2 class="secao-titulo">Três setores, uma rota</h2>
+        <p class="secao-sub">Cada curso indica para qual tipo de instalação ele prepara você.</p>
+        <div class="grade">
+          <a class="cartao" href="cursos.html?setor=residencial"><div class="icone">🏠</div><h3>Residencial</h3><p>Casas e apartamentos: tomadas, iluminação, quadros, DR e DPS.</p></a>
+          <a class="cartao" href="cursos.html?setor=comercial"><div class="icone">🏬</div><h3>Comercial</h3><p>Lojas, escritórios e prédios: trifásico, iluminação e eficiência.</p></a>
+          <a class="cartao" href="cursos.html?setor=industrial"><div class="icone">🏭</div><h3>Industrial</h3><p>Fábricas: motores, comandos elétricos, painéis e automação.</p></a>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="container">
+        <h2 class="secao-titulo">Áreas de formação</h2>
+        <p class="secao-sub">Começamos pela elétrica. As próximas áreas já estão no roteiro.</p>
+        <div class="grade" id="lista-areas"></div>
+      </div>
+    </section>
+
+    <section style="padding-top:0">
+      <div class="container">
+        <h2 class="secao-titulo">Primeiros cursos</h2>
+        <p class="secao-sub">Grade da trilha de elétrica em produção.</p>
+        <div class="grade" id="cursos-destaque"></div>
+        <p style="margin-top:24px"><a class="botao botao-secundario" href="cursos.html">Ver catálogo completo →</a></p>
+      </div>
+    </section>
+  </main>
+  <footer class="rodape-site">
+    <div class="container">
+      <span>© <span data-ano></span> Rota Industrial — Cursos de elétrica industrial, residencial e comercial.</span>
+      <span>Feito no Brasil 🇧🇷</span>
+    </div>
+  </footer>
+  <script src="data/cursos.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
