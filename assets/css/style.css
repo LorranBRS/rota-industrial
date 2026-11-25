@@ -167,3 +167,8 @@ a.cartao:hover { transform: translateY(-3px); border-color: var(--brand); }
 .aula-texto details { border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; margin: 8px 0; }
 .aula-texto summary { cursor: pointer; font-weight: 600; }
 .aula-texto details p { margin: 8px 0 0; }
+
+/* Diagramas das aulas (sempre em fundo claro, como um esquema impresso) */
+.diagrama { margin: 20px 0; }
+.diagrama img { display: block; width: 100%; max-width: 680px; height: auto; margin: 0 auto; background: #fff; border: 1px solid var(--border); border-radius: 10px; }
+.diagrama figcaption { text-align: center; color: var(--muted); font-size: .88rem; margin-top: 8px; }

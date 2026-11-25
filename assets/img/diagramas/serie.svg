@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 590 290" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="590" height="290" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<polyline points="60,70 60,142"/><line x1="38" y1="142" x2="82" y2="142"/><line x1="49" y1="158" x2="71" y2="158" stroke-width="6"/><polyline points="60,158 60,230"/><polyline points="60,70 130,70"/><rect x="130.0" y="56.0" width="70" height="28" fill="#fff"/><polyline points="200,70 260,70"/><rect x="260.0" y="56.0" width="70" height="28" fill="#fff"/><polyline points="330,70 390,70"/><rect x="390.0" y="56.0" width="70" height="28" fill="#fff"/><polyline points="460,70 510,70 510,230 60,230"/><line x1="340" y1="250" x2="240" y2="250" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/>
+</g>
+<g fill="#1b1f24">
+<text x="90" y="140" font-weight="700">+</text><text x="90" y="168" font-weight="700">−</text><text x="30" y="155" text-anchor="end" font-weight="700" fill="#c0392b">12 V</text><text x="165" y="45" text-anchor="middle" fill="#1b1f24" font-weight="600" font-size="15">R1 = 10 Ω</text><text x="165" y="108" text-anchor="middle" fill="#c0392b" font-weight="600" font-size="15">U1 = 2 V</text><text x="295" y="45" text-anchor="middle" fill="#1b1f24" font-weight="600" font-size="15">R2 = 20 Ω</text><text x="295" y="108" text-anchor="middle" fill="#c0392b" font-weight="600" font-size="15">U2 = 4 V</text><text x="425" y="45" text-anchor="middle" fill="#1b1f24" font-weight="600" font-size="15">R3 = 30 Ω</text><text x="425" y="108" text-anchor="middle" fill="#c0392b" font-weight="600" font-size="15">U3 = 6 V</text><text x="290" y="275" text-anchor="middle" fill="#1f5fa8" font-weight="600" font-size="15">I = 0,2 A (a mesma em todos)</text><text x="290" y="165" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="14">2 V + 4 V + 6 V = 12 V</text>
+</g>
+</svg>

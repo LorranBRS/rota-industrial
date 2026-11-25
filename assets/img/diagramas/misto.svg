@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 610 285" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="610" height="285" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<polyline points="60,60 60,142"/><line x1="38" y1="142" x2="82" y2="142"/><line x1="49" y1="158" x2="71" y2="158" stroke-width="6"/><polyline points="60,158 60,240"/><polyline points="60,60 110,60"/><rect x="110.0" y="46.0" width="70" height="28" fill="#fff"/><polyline points="180,60 440,60 440,115"/><rect x="426.0" y="115.0" width="28" height="70" fill="#fff"/><polyline points="440,185 440,240 60,240"/><polyline points="290,60 290,115"/><rect x="276.0" y="115.0" width="28" height="70" fill="#fff"/><polyline points="290,185 290,240"/><line x1="110" y1="92" x2="180" y2="92" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/><line x1="266" y1="120" x2="266" y2="180" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/><line x1="416" y1="120" x2="416" y2="180" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/>
+</g>
+<g fill="#1b1f24">
+<text x="90" y="140" font-weight="700">+</text><text x="90" y="168" font-weight="700">−</text><text x="30" y="155" text-anchor="end" font-weight="700" fill="#c0392b">24 V</text><circle cx="290" cy="60" r="4.5" fill="#1b1f24"/><circle cx="290" cy="240" r="4.5" fill="#1b1f24"/><text x="145" y="35" text-anchor="middle" fill="#1b1f24" font-weight="600" font-size="15">R1 = 4 Ω</text><text x="145" y="115" text-anchor="middle" fill="#1f5fa8" font-weight="600" font-size="15">I = 3 A</text><text x="145" y="135" text-anchor="middle" fill="#c0392b" font-weight="600" font-size="15">U1 = 12 V</text><text x="315" y="145" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">R2 = 6 Ω</text><text x="315" y="168" text-anchor="start" fill="#1f5fa8" font-weight="600" font-size="15">I2 = 2 A</text><text x="465" y="145" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">R3 = 12 Ω</text><text x="465" y="168" text-anchor="start" fill="#1f5fa8" font-weight="600" font-size="15">I3 = 1 A</text><text x="365" y="268" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="14">Paralelo R2 // R3 = 4 Ω, com 12 V sobre ele</text><rect x="250" y="80" width="300" height="135" rx="10" fill="none" stroke="#e08a00" stroke-width="2" stroke-dasharray="6 5"/>
+</g>
+</svg>

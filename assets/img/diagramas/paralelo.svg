@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 590 300" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="590" height="300" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<polyline points="60,60 60,147"/><line x1="38" y1="147" x2="82" y2="147"/><line x1="49" y1="163" x2="71" y2="163" stroke-width="6"/><polyline points="60,163 60,250"/><polyline points="60,60 420,60 420,120"/><rect x="406.0" y="120.0" width="28" height="70" fill="#fff"/><polyline points="420,190 420,250 60,250"/><polyline points="260,60 260,120"/><rect x="246.0" y="120.0" width="28" height="70" fill="#fff"/><polyline points="260,190 260,250"/><line x1="110" y1="42" x2="200" y2="42" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/><line x1="236" y1="125" x2="236" y2="185" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/><line x1="396" y1="125" x2="396" y2="185" stroke="#1f5fa8" stroke-width="2" marker-end="url(#sa)"/>
+</g>
+<g fill="#1b1f24">
+<text x="90" y="145" font-weight="700">+</text><text x="90" y="173" font-weight="700">−</text><text x="30" y="160" text-anchor="end" font-weight="700" fill="#c0392b">12 V</text><circle cx="260" cy="60" r="4.5" fill="#1b1f24"/><circle cx="260" cy="250" r="4.5" fill="#1b1f24"/><text x="155" y="30" text-anchor="middle" fill="#1f5fa8" font-weight="700" font-size="15">I = 6 A</text><text x="285" y="145" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">R1 = 6 Ω</text><text x="285" y="168" text-anchor="start" fill="#1f5fa8" font-weight="600" font-size="15">I1 = 2 A</text><text x="445" y="145" text-anchor="start" fill="#1b1f24" font-weight="600" font-size="15">R2 = 3 Ω</text><text x="445" y="168" text-anchor="start" fill="#1f5fa8" font-weight="600" font-size="15">I2 = 4 A</text><text x="280" y="285" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="14">Tensão igual (12 V) em todos · 2 A + 4 A = 6 A</text>
+</g>
+</svg>

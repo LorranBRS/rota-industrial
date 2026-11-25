@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 550 260" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="550" height="260" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<polyline points="70,50 480,50"/><polyline points="70,100 480,100"/><polyline points="70,150 480,150"/><polyline points="70,200 480,200"/><line x1="220" y1="54" x2="220" y2="196" stroke="#c0392b" stroke-width="2" marker-start="url(#sv)" marker-end="url(#sv)"/><line x1="360" y1="54" x2="360" y2="96" stroke="#c0392b" stroke-width="2" marker-start="url(#sv)" marker-end="url(#sv)"/>
+</g>
+<g fill="#1b1f24">
+<text x="60" y="55" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="15">L1</text><text x="60" y="105" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="15">L2</text><text x="60" y="155" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="15">L3</text><text x="60" y="205" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="15">N</text><text x="230" y="120" text-anchor="start" fill="#c0392b" font-weight="700" font-size="15">127 V</text><text x="230" y="138" text-anchor="start" fill="#5b6470" font-weight="400" font-size="13">fase–neutro</text><text x="370" y="70" text-anchor="start" fill="#c0392b" font-weight="700" font-size="15">220 V</text><text x="370" y="88" text-anchor="start" fill="#5b6470" font-weight="400" font-size="13">fase–fase</text><text x="275" y="240" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="16">220 V ≈ 127 V × √3 (1,732)</text>
+</g>
+</svg>

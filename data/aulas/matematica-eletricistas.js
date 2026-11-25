@@ -132,6 +132,8 @@ window.ROTA_AULAS["matematica-eletricistas"] = {
         <li>127 V × 1,732 ≈ <strong>220 V</strong></li>
         <li>220 V × 1,732 ≈ <strong>380 V</strong></li>
       </ul>
+      <figure class="diagrama"><img src="assets/img/diagramas/trifasico.svg" alt="Três fases e neutro com 127 V entre fase e neutro e 220 V entre fases" loading="lazy"><figcaption>Rede 127/220 V: a tensão entre fases é √3 vezes a tensão fase-neutro.</figcaption></figure>
+
       <p>É por isso que existem os pares 127/220 V e 220/380 V.</p>
 
       <h2>Teste rápido</h2>

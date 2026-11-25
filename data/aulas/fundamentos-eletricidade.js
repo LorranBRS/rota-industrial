@@ -235,6 +235,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <li>Símbolo no multímetro: <strong>V~</strong> (ou VAC).</li>
       </ul>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/cc-ca.svg" alt="Gráficos de tensão contínua (linha reta) e alternada (senoide)" loading="lazy"><figcaption>Na CC a tensão é constante; na CA ela oscila 60 vezes por segundo.</figcaption></figure>
+
       <h2>Por que a rede é em CA?</h2>
       <p>Porque a tensão alternada pode ser <strong>elevada e reduzida com transformadores</strong>. Isso permite transmitir energia
       em alta tensão (menos perdas) e baixar para valores seguros perto do consumidor.</p>
@@ -267,6 +269,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       <h2>Sentido real x sentido convencional</h2>
       <p>Os elétrons andam do polo <strong>negativo para o positivo</strong> (sentido real). Por razões históricas, nos diagramas usamos o
       <strong>sentido convencional</strong>: do positivo para o negativo. Os cálculos dão o mesmo resultado.</p>
+
+      <figure class="diagrama"><img src="assets/img/diagramas/circuito-simples.svg" alt="Circuito com fonte, resistor e seta da corrente" loading="lazy"><figcaption>Sentido convencional: a corrente sai do polo positivo da fonte.</figcaption></figure>
 
       <h2>Efeitos da corrente</h2>
       <table>
@@ -329,6 +333,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <li>Ponteira preta no <strong>COM</strong>, vermelha no <strong>VΩ</strong>.</li>
         <li>Toque os dois pontos e leia.</li>
       </ol>
+
+      <figure class="diagrama"><img src="assets/img/diagramas/medicao-tensao-corrente.svg" alt="Voltímetro ligado em paralelo e amperímetro ligado em série" loading="lazy"><figcaption>Voltímetro em paralelo com o componente; amperímetro em série, no caminho da corrente.</figcaption></figure>
 
       <div class="destaque alerta"><strong>Segurança:</strong> verifique antes se o instrumento e as ponteiras têm a categoria (CAT III/CAT IV)
       adequada ao local da medição. Veremos isso no módulo de instrumentos.</div>
@@ -412,6 +418,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       <p>Truque do triângulo: escreva <strong>U</strong> em cima e <strong>R · I</strong> embaixo. Tape com o dedo a grandeza que você quer
       e o que sobra é a fórmula.</p>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/circuito-simples.svg" alt="Circuito com fonte U, resistência R e corrente I" loading="lazy"><figcaption>O circuito básico da Lei de Ohm: U = R · I.</figcaption></figure>
+
       <h2>Exemplos resolvidos</h2>
       <p><strong>1)</strong> Um resistor de 22 Ω está ligado em 12 V. Qual a corrente?<br>
       I = 12 / 22 = <strong>0,545 A</strong> (545 mA)</p>
@@ -456,6 +464,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       Em 220 V isso é <strong>6,3%</strong> — acima do limite usual de 4% para circuitos terminais.</p>
       <p>Trocando por cabo de <strong>4 mm²</strong>: R = 0,0172 × 100 / 4 = 0,43 Ω → queda de 8,6 V (3,9%). Resolvido.</p>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/queda-tensao.svg" alt="Circuito com resistência do cabo na ida e na volta e a carga" loading="lazy"><figcaption>A resistência do cabo de ida e de volta "rouba" 13,8 V antes de a energia chegar à carga.</figcaption></figure>
+
       <div class="destaque"><strong>Lição prática:</strong> o cabo não é escolhido só pela corrente que suporta; em distâncias longas,
       a <strong>queda de tensão</strong> é que manda. Motores com tensão baixa esquentam e perdem torque.</div>
 
@@ -499,6 +509,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       <p>1ª e 2ª faixas = dígitos; 3ª = multiplicador; 4ª = tolerância (<strong>ouro ±5%</strong>, <strong>prata ±10%</strong>).</p>
       <p><strong>Exemplo:</strong> amarelo, violeta, vermelho, ouro → 4 7 × 100 = <strong>4.700 Ω (4,7 kΩ) ±5%</strong>.</p>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/resistor-cores.svg" alt="Resistor com faixas amarela, violeta, vermelha e ouro" loading="lazy"><figcaption>Lendo o código de cores: 4,7 kΩ ±5%.</figcaption></figure>
+
       <h2>Potência do resistor</h2>
       <p>Além do valor em ohms, todo resistor tem uma <strong>potência máxima</strong> (1/4 W, 1/2 W, 5 W...). Se dissipar mais que isso, queima.
       Calcularemos isso no módulo de potência.</p>
@@ -522,6 +534,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <li>O maior resistor fica com a maior parte da tensão.</li>
         <li>Se um componente abrir (queimar), <strong>todo o circuito para</strong>.</li>
       </ul>
+
+      <figure class="diagrama"><img src="assets/img/diagramas/serie.svg" alt="Três resistores em série com fonte de 12 V" loading="lazy"><figcaption>Em série: mesma corrente, tensão dividida.</figcaption></figure>
 
       <h2>Exemplo resolvido</h2>
       <p>Resistores de 10 Ω, 20 Ω e 30 Ω em série numa fonte de 12 V:</p>
@@ -561,6 +575,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <li>Se um componente abrir, os outros continuam funcionando.</li>
       </ul>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/paralelo.svg" alt="Dois resistores em paralelo com fonte de 12 V" loading="lazy"><figcaption>Em paralelo: mesma tensão, corrente dividida.</figcaption></figure>
+
       <h2>Exemplo resolvido</h2>
       <p>6 Ω e 3 Ω em paralelo numa fonte de 12 V:</p>
       <ol>
@@ -596,6 +612,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <li><strong>Tensão no paralelo:</strong> 24 − 12 = 12 V (ou 4 Ω × 3 A)</li>
         <li><strong>Correntes:</strong> I₂ = 12 / 6 = 2 A · I₃ = 12 / 12 = 1 A → 2 + 1 = 3 A ✓</li>
       </ol>
+
+      <figure class="diagrama"><img src="assets/img/diagramas/misto.svg" alt="R1 em série com o paralelo de R2 e R3, fonte de 24 V" loading="lazy"><figcaption>O bloco tracejado (paralelo) vale 4 Ω; somado a R1 dá 8 Ω.</figcaption></figure>
 
       <div class="destaque"><strong>Método:</strong> 1) identifique blocos série/paralelo; 2) reduza um por vez, redesenhando o circuito;
       3) ache a corrente total; 4) volte calculando cada parte; 5) confira se as somas batem.</div>
@@ -752,6 +770,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
         <li><strong>Corrente:</strong> em série, abrindo o circuito — na prática, prefira o alicate amperímetro.</li>
       </ul>
 
+      <figure class="diagrama"><img src="assets/img/diagramas/medicao-tensao-corrente.svg" alt="Como ligar o multímetro para medir tensão e corrente" loading="lazy"><figcaption>Tensão em paralelo, corrente em série.</figcaption></figure>
+
       <h2>Categorias de segurança (CAT)</h2>
       <p>Indicam onde o instrumento pode ser usado com segurança contra surtos:</p>
       <ul>
@@ -783,6 +803,8 @@ window.ROTA_AULAS["fundamentos-eletricidade"] = {
       <h2>Regra de ouro: um condutor só</h2>
       <p>Abrace <strong>apenas um condutor</strong>. Se você abraçar fase e neutro juntos, as correntes têm sentidos opostos, os campos se
       cancelam e o alicate mostra <strong>zero</strong> (ou quase).</p>
+      <figure class="diagrama"><img src="assets/img/diagramas/alicate.svg" alt="Alicate abraçando só a fase (5,2 A) e fase com neutro (0,0 A)" loading="lazy"><figcaption>Abrace um condutor só. Com fase e neutro juntos, os campos se anulam.</figcaption></figure>
+
       <div class="destaque"><strong>Truque útil:</strong> esse "zero" pode ser usado a seu favor. Abrace fase e neutro de um circuito:
       se aparecer alguns miliampères, existe <strong>corrente de fuga</strong> para o terra — provável causa de DR desarmando.</div>
 
