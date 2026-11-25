@@ -446,6 +446,261 @@ for a, nome, desc, cor, y in ((25, "Ib = 25 A", "corrente do chuveiro", BLUE, 70
 tx += t(300, 175, "Ib ≤ In ≤ Iz   (corrente do circuito ≤ disjuntor ≤ capacidade do cabo)", peso="700", tam=15) + t(X(46), 134, "A", MUTED, anc="end", tam=12)
 arquivos["res-coordenacao"] = svg(600, 195, (b, tx))
 
+# ===================== COMANDOS ELÉTRICOS =====================
+# símbolos IEC desenhados na vertical (corrente de cima para baixo)
+def ct(x, ya, yb, tipo="na", acion=None, ym=None, nome=None, nums=None):
+    """contato NA/NF entre ya e yb; acion = None | 'botao' | 'termico'"""
+    ym = (ya + yb) / 2 if ym is None else ym
+    b = L((x, ya), (x, ym-18)) + L((x, ym+18), (x, yb))
+    if tipo == "na":
+        b += f'<line x1="{x}" y1="{ym+18}" x2="{x-14}" y2="{ym-16}"/>'
+        mx = x - 7
+    else:
+        b += f'<line x1="{x}" y1="{ym-18}" x2="{x+12}" y2="{ym-18}"/><line x1="{x}" y1="{ym+18}" x2="{x+16}" y2="{ym-22}"/>'
+        mx = x + 8
+    tx = ""
+    if acion == "botao":
+        b += f'<line x1="{mx}" y1="{ym}" x2="{x-30}" y2="{ym}" stroke-width="2" stroke-dasharray="4 3"/>'
+        b += L((x-24, ym-9), (x-30, ym-9), (x-30, ym+9), (x-24, ym+9))
+    elif acion == "termico":
+        b += f'<line x1="{mx}" y1="{ym}" x2="{x-28}" y2="{ym}" stroke-width="2" stroke-dasharray="4 3"/>'
+        b += L((x-28, ym-8), (x-36, ym-8), (x-36, ym+8), (x-44, ym+8))
+    if nome:
+        xn = x - (52 if acion == "termico" else 40 if acion == "botao" else 22)
+        tx += t(xn, ym+5, nome, anc="end", peso="700", tam=14)
+    if nums:
+        dx = 22 if tipo == "nf" else 10
+        tx += t(x+dx, ym-14, nums[0], MUTED, anc="start", tam=11) + t(x+10, ym+30, nums[1], MUTED, anc="start", tam=11)
+    return b, tx
+
+def bob(x, ya, yb, nome=None, ym=None, temporizada=False):
+    ym = (ya + yb) / 2 if ym is None else ym
+    b = L((x, ya), (x, ym-14)) + L((x, ym+14), (x, yb)) + f'<rect x="{x-22}" y="{ym-14}" width="44" height="28" fill="#fff"/>'
+    if temporizada:
+        b += f'<rect x="{x+22}" y="{ym-14}" width="14" height="28" fill="{INK}"/>'
+    tx = t(x+28 + (14 if temporizada else 0), ym-6, "A1", MUTED, anc="start", tam=11) + t(x+28 + (14 if temporizada else 0), ym+16, "A2", MUTED, anc="start", tam=11)
+    if nome:
+        tx += t(x-30, ym+5, nome, anc="end", peso="700", tam=14)
+    return b, tx
+
+def fus(x, ya, yb, nome=None):
+    ym = (ya + yb) / 2
+    b = L((x, ya), (x, yb)) + f'<rect x="{x-7}" y="{ym-18}" width="14" height="36" fill="#fff"/>' + L((x, ym-18), (x, ym+18))
+    tx = t(x-16, ym+5, nome, anc="end", peso="700", tam=14) if nome else ""
+    return b, tx
+
+def sinal(x, ya, yb, nome=None):
+    ym = (ya + yb) / 2
+    b = L((x, ya), (x, yb)) + lampada(x, ym, 15)
+    tx = t(x-24, ym+5, nome, anc="end", peso="700", tam=14) if nome else ""
+    return b, tx
+
+def soma(*partes):
+    return "".join(p[0] for p in partes), "".join(p[1] for p in partes)
+
+def motor(cx, cy, r=40):
+    return f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#fff"/>', t(cx, cy-2, "M", peso="800", tam=20) + t(cx, cy+18, "3~", peso="700", tam=14)
+
+def termico3(xs, y1, y2, nome=None):
+    b = f'<rect x="{xs[0]-22}" y="{y1}" width="{xs[-1]-xs[0]+44}" height="{y2-y1}" rx="4" fill="#fff"/>'
+    ym = (y1 + y2) / 2
+    for x in xs:
+        b += L((x, y1), (x, ym-7), (x+7, ym-7), (x+7, ym+7), (x, ym+7), (x, y2))
+    return b, (t(xs[0]-30, ym+5, nome, anc="end", peso="700", tam=14) if nome else "")
+
+def contatos3(xs, ya, yb, nome=None, nums=None):
+    b, tx = "", ""
+    for i, x in enumerate(xs):
+        bb, tt = ct(x, ya, yb, "na", nome=nome if i == 0 else None)
+        b += bb; tx += tt
+    ym = (ya + yb) / 2
+    b += f'<line x1="{xs[0]-7}" y1="{ym}" x2="{xs[-1]-7}" y2="{ym}" stroke="{MUTED}" stroke-width="2" stroke-dasharray="5 4"/>'
+    return b, tx
+
+def trilhos(x1, x2, ytop, ybot, ltop="L (fase)", lbot="N"):
+    b = f'<line x1="{x1}" y1="{ytop}" x2="{x2}" y2="{ytop}" stroke="{RED}" stroke-width="3"/>'
+    b += f'<line x1="{x1}" y1="{ybot}" x2="{x2}" y2="{ybot}" stroke="{BLUE}" stroke-width="3"/>'
+    return b, t(x1, ytop-10, ltop, RED, anc="start", peso="700", tam=13) + t(x1, ybot+20, lbot, BLUE, anc="start", peso="700", tam=13)
+
+# 1. contator: bobina e contatos que mudam juntos
+p = [bob(70, 80, 220, "K1"),
+     contatos3((170, 210, 250), 80, 220), ct(330, 80, 220, "na", nums=("13", "14")), ct(410, 80, 220, "nf", nums=("21", "22"))]
+b, tx = soma(*p)
+b += f'<line x1="92" y1="150" x2="418" y2="150" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 4"/>'
+for x, a, z in ((170, "1", "2"), (210, "3", "4"), (250, "5", "6")):
+    tx += t(x+10, 136, a, MUTED, anc="start", tam=11) + t(x+10, 180, z, MUTED, anc="start", tam=11)
+tx += t(70, 250, "bobina", peso="700", tam=13) + t(70, 266, "A1-A2", MUTED, tam=12)
+tx += t(210, 250, "contatos principais", peso="700", tam=13) + t(210, 266, "força do motor", MUTED, tam=12)
+tx += t(330, 250, "auxiliar NA", peso="700", tam=13) + t(330, 266, "13-14", MUTED, tam=12)
+tx += t(410, 250, "auxiliar NF", peso="700", tam=13) + t(410, 266, "21-22", MUTED, tam=12)
+tx += t(240, 40, "Bobina energizada → todos os contatos mudam de estado juntos", ORANGE, peso="700", tam=14)
+tx += t(240, 60, "(desenho sempre na posição de repouso: bobina desligada)", MUTED, tam=12)
+arquivos["cmd-contator"] = svg(470, 285, (b, tx))
+
+# 2. tabela de símbolos
+cel = [("na", "Contato NA", "aberto em repouso"), ("nf", "Contato NF", "fechado em repouso"), ("bna", "Botão NA", "liga (pulsador)"),
+       ("bnf", "Botão NF", "desliga (pulsador)"), ("bob", "Bobina", "contator / relé"),
+       ("fus", "Fusível", "proteção contra curto"), ("ter", "Contato térmico", "95-96 do relé"), ("lam", "Sinaleiro", "lâmpada indicadora"),
+       ("mot", "Motor trifásico", "M 3~"), ("kt", "Bobina temporizada", "retardo na energização")]
+b, tx = "", ""
+for i, (k, n1, n2) in enumerate(cel):
+    cx = 75 + (i % 5) * 130; y0 = 20 + (i // 5) * 170
+    b += f'<rect x="{cx-60}" y="{y0}" width="120" height="155" rx="10" fill="#f6f7f9" stroke="#e2e5ea" stroke-width="1.5"/>'
+    ya, yb = y0 + 18, y0 + 100
+    sx = cx + 8
+    if k in ("na", "nf"):
+        pp = ct(sx, ya, yb, k)
+    elif k == "bna":
+        pp = ct(sx + 8, ya, yb, "na", acion="botao")
+    elif k == "bnf":
+        pp = ct(sx + 4, ya, yb, "nf", acion="botao")
+    elif k == "ter":
+        pp = ct(sx + 10, ya, yb, "nf", acion="termico")
+    elif k == "bob":
+        pp = bob(cx - 4, ya, yb)
+    elif k == "kt":
+        pp = bob(cx - 10, ya, yb, temporizada=True)
+    elif k == "fus":
+        pp = fus(cx, ya, yb)
+    elif k == "lam":
+        pp = sinal(cx, ya, yb)
+    else:
+        pp = (L((cx, ya), (cx, ya + 20)) + f'<circle cx="{cx}" cy="{ya+50}" r="30" fill="#fff"/>',
+              t(cx, ya + 48, "M", peso="800", tam=17) + t(cx, ya + 66, "3~", peso="700", tam=12))
+    b += pp[0]; tx += pp[1]
+    tx += t(cx, y0 + 125, n1, peso="700", tam=13) + t(cx, y0 + 143, n2, MUTED, tam=11)
+arquivos["cmd-simbolos"] = svg(670, 360, (b, tx))
+
+# 3. força da partida direta
+xs = (130, 170, 210)
+b, tx = "", ""
+for x, n in zip(xs, ("L1", "L2", "L3")):
+    tx += t(x, 28, n, RED, peso="800", tam=14)
+    bb, tt = fus(x, 40, 120); b += bb
+    b += L((x, 120), (x, 140)) + L((x, 205), (x, 225)) + L((x, 265), (x, 345))
+bb, tt = contatos3(xs, 135, 210, "K1"); b += bb; tx += tt
+bb, tt = termico3(xs, 225, 265, "F7"); b += bb; tx += tt
+bb, tt = motor(170, 375); b += bb; tx += tt
+tx += t(100, 85, "F1-F3", anc="end", peso="700", tam=14)
+tx += t(250, 85, "fusíveis: proteção contra curto-circuito", anc="start", tam=13)
+tx += t(250, 177, "K1: contator (liga e desliga o motor)", anc="start", tam=13)
+tx += t(250, 250, "F7: relé térmico (sobrecarga)", anc="start", tam=13)
+tx += t(250, 380, "motor de indução trifásico", anc="start", tam=13)
+arquivos["cmd-forca-direta"] = svg(530, 430, (b, tx))
+
+# 4. comando com selo
+b, tx = trilhos(40, 400, 40, 440)
+p = [fus(110, 40, 108, "F21"), ct(110, 108, 172, "nf", acion="termico", nome="F7", nums=("95", "96")),
+     ct(110, 172, 245, "nf", acion="botao", nome="S0"), ct(110, 245, 325, "na", acion="botao", nome="S1"),
+     ct(210, 245, 325, "na", nome="K1", nums=("13", "14")), bob(110, 325, 440, "K1"),
+     ct(320, 105, 260, "na", nome="K1", nums=("43", "44")), sinal(320, 260, 440, "H1")]
+bb, tt = soma(*p); b += bb; tx += tt
+b += L((110, 245), (210, 245)) + L((110, 325), (210, 325)) + L((110, 105), (320, 105))
+tx += dot(110, 245) + dot(110, 325) + dot(110, 105)
+tx += f'<rect x="170" y="232" width="92" height="106" rx="8" fill="none" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 5"/>'
+tx += t(272, 300, "selo", ORANGE, anc="start", peso="800", tam=14)
+tx += t(346, 355, "ligado", MUTED, anc="start", tam=12)
+tx += t(210, 488, "Ao soltar S1, a bobina continua alimentada pelo contato K1 13-14.", peso="700", tam=13)
+arquivos["cmd-selo"] = svg(440, 500, (b, tx))
+
+# 5. reversão — força
+b, tx = "", ""
+K1x, K2x = (100, 140, 180), (300, 340, 380)
+for x, n, yt in zip(K1x, ("L1", "L2", "L3"), (118, 133, 148)):
+    tx += t(x, 28, n, RED, peso="800", tam=14)
+    bb, tt = fus(x, 40, 100); b += bb
+    b += L((x, 100), (x, 170))
+    b += L((x, yt), (K2x[K1x.index(x)], yt), (K2x[K1x.index(x)], 170))
+    tx += dot(x, yt)
+bb, tt = contatos3(K1x, 165, 240, "K1"); b += bb; tx += tt
+bb, tt = contatos3(K2x, 165, 240); b += bb; tx += tt
+tx += t(410, 207, "K2", anc="start", peso="700", tam=14)
+for x in K1x:
+    b += L((x, 240), (x, 330))
+for xk, xd, y in ((300, 180, 262), (340, 140, 280), (380, 100, 298)):
+    b += f'<polyline points="{xk},240 {xk},{y} {xd},{y}" stroke="{ORANGE}" stroke-width="3"/>'
+    tx += dot(xd, y)
+bb, tt = termico3(K1x, 330, 366, "F7"); b += bb; tx += tt
+b += "".join(L((x, 366), (x, 410)) for x in K1x)
+bb, tt = motor(140, 440); b += bb; tx += tt
+tx += t(340, 320, "K2 entrega L1 onde estava L3", ORANGE, peso="700", tam=13) + t(340, 338, "e L3 onde estava L1", ORANGE, peso="700", tam=13)
+tx += t(240, 510, "Trocar duas fases inverte o sentido de giro do motor.", peso="700", tam=14)
+arquivos["cmd-reversao-forca"] = svg(500, 525, (b, tx))
+
+# 6. reversão — comando com intertravamento
+b, tx = trilhos(40, 560, 40, 495)
+p = [fus(110, 40, 108, "F21"), ct(110, 108, 172, "nf", acion="termico", nome="F7", nums=("95", "96")),
+     ct(110, 172, 245, "nf", acion="botao", nome="S0"),
+     ct(110, 245, 335, "na", acion="botao", nome="S1"), ct(200, 245, 335, "na", nome="K1", nums=("13", "14")),
+     ct(110, 335, 412, "nf", nome="K2", nums=("21", "22")), bob(110, 412, 495, "K1"),
+     ct(390, 245, 335, "na", acion="botao", nome="S2"), ct(480, 245, 335, "na", nome="K2", nums=("13", "14")),
+     ct(390, 335, 412, "nf", nome="K1", nums=("21", "22")), bob(390, 412, 495, "K2")]
+bb, tt = soma(*p); b += bb; tx += tt
+b += L((110, 245), (480, 245)) + L((110, 335), (200, 335)) + L((390, 335), (480, 335))
+tx += dot(110, 245) + dot(200, 245) + dot(390, 245) + dot(110, 335) + dot(390, 335)
+for x in (110, 390):
+    tx += f'<rect x="{x-50}" y="345" width="100" height="58" rx="8" fill="none" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 5"/>'
+tx += t(250, 370, "intertravamento", ORANGE, peso="800", tam=13) + t(250, 388, "um bloqueia o outro", ORANGE, tam=12)
+tx += t(110, 542, "K1 — sentido horário", peso="700", tam=13) + t(390, 542, "K2 — anti-horário", peso="700", tam=13)
+arquivos["cmd-reversao-comando"] = svg(600, 558, (b, tx))
+
+# 7. ligações estrela e triângulo (motor de 6 pontas)
+def bobina_rot(x1, y1, x2, y2, rot):
+    cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+    ang = math.degrees(math.atan2(y2 - y1, x2 - x1)) - 90
+    return (L((x1, y1), (x2, y2)) + f'<rect x="-9" y="-24" width="18" height="48" fill="#fff" transform="translate({cx:.1f},{cy:.1f}) rotate({ang:.1f})"/>',
+            t(cx + rot[0], cy + rot[1], rot[2], MUTED, tam=11))
+cx, cy = 160, 170
+pontas = [(cx + 95 * math.cos(math.radians(a)), cy + 95 * math.sin(math.radians(a))) for a in (-90, 30, 150)]
+b, tx = "", ""
+for (px, py), (n, lin), off in zip(pontas, (("1", "L1"), ("2", "L2"), ("3", "L3")), ((0, 0), (0, 0), (0, 0))):
+    bb, tt = bobina_rot(cx, cy, px, py, (0, 0, "")); b += bb
+    tx += dot(px, py)
+tx += t(pontas[0][0], pontas[0][1] - 12, "1 → L1", RED, peso="700", tam=13)
+tx += t(pontas[1][0] + 10, pontas[1][1] + 20, "2 → L2", RED, anc="start", peso="700", tam=13)
+tx += t(pontas[2][0] - 10, pontas[2][1] + 20, "3 → L3", RED, anc="end", peso="700", tam=13)
+tx += dot(cx, cy) + t(cx + 16, cy - 12, "4-5-6 unidas", ORANGE, anc="start", peso="700", tam=12)
+tx += t(cx, 300, "Estrela (Y) — partida", peso="800", tam=15) + t(cx, 320, "cada bobina recebe 220 ÷ √3 ≈ 127 V", MUTED, tam=12)
+tx += t(cx, 337, "corrente e conjugado caem para ≈ 1/3", MUTED, tam=12)
+V = [(480, 70), (400, 225), (560, 225)]
+for (a, c) in ((0, 1), (1, 2), (2, 0)):
+    bb, tt = bobina_rot(V[a][0], V[a][1], V[c][0], V[c][1], (0, 0, "")); b += bb
+for (vx, vy) in V:
+    tx += dot(vx, vy)
+tx += t(480, 56, "1+6 → L1", RED, peso="700", tam=13) + t(392, 250, "2+4 → L2", RED, peso="700", tam=13) + t(568, 250, "3+5 → L3", RED, peso="700", tam=13)
+tx += t(480, 300, "Triângulo (Δ) — regime", peso="800", tam=15) + t(480, 320, "cada bobina recebe a tensão da rede: 220 V", MUTED, tam=12)
+tx += t(480, 337, "motor desenvolve o conjugado nominal", MUTED, tam=12)
+b += '<line x1="320" y1="30" x2="320" y2="340" stroke="#e2e5ea" stroke-width="2"/>'
+tx += t(320, 368, "Exemplo: motor 220/380 V ligado em rede de 220 V", peso="700", tam=13)
+arquivos["cmd-estrela-triangulo"] = svg(640, 382, (b, tx))
+
+# 8. diagrama de tempos — temporizador e estrela-triângulo
+def barras(linhas, marcas, legenda, w=620):
+    b, tx = "", ""
+    x0, x1 = 170, w - 40
+    for i, (nome, cor, ini, fim) in enumerate(linhas):
+        y = 40 + i * 46
+        b += f'<line x1="{x0}" y1="{y+22}" x2="{x1}" y2="{y+22}" stroke="#e2e5ea" stroke-width="2"/>'
+        tx += t(x0 - 14, y + 18, nome, anc="end", peso="700", tam=13)
+        for a, z in ([(ini, fim)] if not isinstance(ini, list) else zip(ini, fim)):
+            tx += f'<rect x="{a}" y="{y}" width="{z-a}" height="22" rx="4" fill="{cor}"/>'
+    yb = 40 + len(linhas) * 46
+    for x, txt in marcas:
+        b += f'<line x1="{x}" y1="28" x2="{x}" y2="{yb}" stroke="{MUTED}" stroke-width="1.5" stroke-dasharray="5 4"/>'
+        tx += t(x, yb + 18, txt, MUTED, tam=12)
+    tx += t((x0 + x1) / 2, yb + 50, legenda, peso="700", tam=13)
+    return b, tx, yb + 65
+b, tx, h = barras([("bobina KT (A1-A2)", BLUE, 200, 470), ("contato 15-18 (NA)", ORANGE, 330, 470), ("contato 15-16 (NF)", GREEN, [170, 470], [330, 580])],
+                  [(200, "energiza"), (330, "após o tempo t"), (470, "desenergiza")], "Retardo na energização: o contato só muda depois do tempo ajustado.")
+b += seta(205, 30, 325, 30) + seta(325, 30, 205, 30)
+tx += t(265, 22, "t", BLUE, peso="800", tam=14)
+arquivos["cmd-temporizador"] = svg(620, h, (b, tx))
+
+b, tx, h = barras([("K1 — rede", RED, 190, 580), ("K3 — estrela", BLUE, 190, 380), ("KT — temporizador", MUTED, 190, 580), ("K2 — triângulo", ORANGE, 400, 580)],
+                  [(190, "liga (S1)"), (380, "fim do tempo"), (400, "")], "K3 e K2 nunca ficam ligados juntos (intertravamento).")
+tx += t(390, 20, "pausa", MUTED, tam=11)
+arquivos["cmd-yd-sequencia"] = svg(620, h, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")

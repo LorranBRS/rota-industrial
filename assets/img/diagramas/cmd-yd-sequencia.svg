@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 650 289" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="650" height="289" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<line x1="170" y1="62" x2="580" y2="62" stroke="#e2e5ea" stroke-width="2"/><line x1="170" y1="108" x2="580" y2="108" stroke="#e2e5ea" stroke-width="2"/><line x1="170" y1="154" x2="580" y2="154" stroke="#e2e5ea" stroke-width="2"/><line x1="170" y1="200" x2="580" y2="200" stroke="#e2e5ea" stroke-width="2"/><line x1="190" y1="28" x2="190" y2="224" stroke="#5b6470" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="380" y1="28" x2="380" y2="224" stroke="#5b6470" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="400" y1="28" x2="400" y2="224" stroke="#5b6470" stroke-width="1.5" stroke-dasharray="5 4"/>
+</g>
+<g fill="#1b1f24">
+<text x="156" y="58" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="13">K1 — rede</text><rect x="190" y="40" width="390" height="22" rx="4" fill="#c0392b"/><text x="156" y="104" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="13">K3 — estrela</text><rect x="190" y="86" width="190" height="22" rx="4" fill="#1f5fa8"/><text x="156" y="150" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="13">KT — temporizador</text><rect x="190" y="132" width="390" height="22" rx="4" fill="#5b6470"/><text x="156" y="196" text-anchor="end" fill="#1b1f24" font-weight="700" font-size="13">K2 — triângulo</text><rect x="400" y="178" width="180" height="22" rx="4" fill="#e08a00"/><text x="190" y="242" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="12">liga (S1)</text><text x="380" y="242" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="12">fim do tempo</text><text x="400" y="242" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="12"></text><text x="375.0" y="274" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="13">K3 e K2 nunca ficam ligados juntos (intertravamento).</text><text x="390" y="20" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="11">pausa</text>
+</g>
+</svg>

@@ -150,7 +150,7 @@ window.ROTA = {
       titulo: "Comandos Elétricos Industriais",
       nivel: "Intermediário",
       cargaHoraria: "24h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "Contatores, relés, partida direta, reversora e estrela-triângulo. Leitura e montagem de diagramas.",
       modulos: [
         { titulo: "Componentes", aulas: ["Contatores", "Relé térmico e disjuntor-motor", "Botoeiras, sinaleiros e temporizadores"] },
