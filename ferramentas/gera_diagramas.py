@@ -701,6 +701,140 @@ b, tx, h = barras([("K1 — rede", RED, 190, 580), ("K3 — estrela", BLUE, 190,
 tx += t(390, 20, "pausa", MUTED, tam=11)
 arquivos["cmd-yd-sequencia"] = svg(620, h, (b, tx))
 
+# ===================== MOTORES ELÉTRICOS =====================
+def flecha(x1, y1, x2, y2, cor, w=4):
+    ang = math.atan2(y2 - y1, x2 - x1)
+    p1 = (x2 - 14 * math.cos(ang - 0.45), y2 - 14 * math.sin(ang - 0.45))
+    p2 = (x2 - 14 * math.cos(ang + 0.45), y2 - 14 * math.sin(ang + 0.45))
+    return (f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2 - 8*math.cos(ang):.1f}" y2="{y2 - 8*math.sin(ang):.1f}" stroke="{cor}" stroke-width="{w}"/>'
+            f'<polygon points="{x2:.1f},{y2:.1f} {p1[0]:.1f},{p1[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}" fill="{cor}" stroke="none"/>')
+
+# 1. campo girante
+CORES = (RED, BLUE, ORANGE)
+x0, x1, yc, A = 60, 420, 120, 55
+b, tx = f'<line x1="{x0}" y1="{yc}" x2="{x1+10}" y2="{yc}" stroke="{MUTED}" stroke-width="1.5"/>', ""
+for k, cor in enumerate(CORES):
+    pts = " ".join(f"{x0 + (x1-x0)*d/360:.1f},{yc - A*math.sin(math.radians(d - 120*k)):.1f}" for d in range(0, 361, 5))
+    b += f'<polyline points="{pts}" stroke="{cor}" stroke-width="3"/>'
+for nome, cor, y in (("fase A", RED, 30), ("fase B", BLUE, 48), ("fase C", ORANGE, 66)):
+    tx += t(x1 + 30, y, nome, cor, anc="start", peso="700", tam=13)
+for i, d in enumerate((90, 210, 330)):
+    x = x0 + (x1 - x0) * d / 360
+    b += f'<line x1="{x}" y1="{yc-A-12}" x2="{x}" y2="{yc+A+8}" stroke="{MUTED}" stroke-width="1.5" stroke-dasharray="5 4"/>'
+    tx += t(x, yc + A + 26, f"t{i+1}", peso="800", tam=14)
+    cx, cy, r = 130 + i * 160, 290, 52
+    b += f'<circle cx="{cx}" cy="{cy}" r="{r}" stroke="#c9ced6" stroke-width="2"/>'
+    for k, cor in enumerate(CORES):
+        a = math.radians(-90 + 120 * k)
+        b += f'<line x1="{cx}" y1="{cy}" x2="{cx + r*math.cos(a):.1f}" y2="{cy + r*math.sin(a):.1f}" stroke="{cor}" stroke-width="1.5" stroke-dasharray="4 3"/>'
+        tx += t(cx + (r+12)*math.cos(a), cy + (r+12)*math.sin(a) + 5, "ABC"[k], cor, peso="800", tam=12)
+    a = math.radians(-90 + 120 * i)
+    tx += flecha(cx, cy, cx + (r-6)*math.cos(a), cy + (r-6)*math.sin(a), GREEN)
+    tx += t(cx, cy + r + 32, f"t{i+1}: campo no eixo {'ABC'[i]}", peso="700", tam=13)
+tx += t(290, 410, "As três correntes defasadas criam um campo que gira, sem nenhuma peça se mover.", peso="700", tam=13)
+arquivos["mot-campo-girante"] = svg(600, 425, (b, tx))
+
+# 2. partes do motor (corte)
+cx, cy = 180, 190
+b = f'<circle cx="{cx}" cy="{cy}" r="150" fill="#e9ecf0"/>'
+for k in range(16):
+    a = math.radians(k * 22.5)
+    b += f'<rect x="-6" y="-14" width="12" height="28" rx="3" fill="#e9ecf0" stroke="{MUTED}" stroke-width="1.5" transform="translate({cx+152*math.cos(a):.1f},{cy+152*math.sin(a):.1f}) rotate({k*22.5+90})"/>'
+b += f'<circle cx="{cx}" cy="{cy}" r="138" fill="#cfd5dd"/>'
+b += f'<circle cx="{cx}" cy="{cy}" r="96" fill="#fff"/>'
+for k in range(24):
+    a = math.radians(k * 15)
+    b += f'<circle cx="{cx+108*math.cos(a):.1f}" cy="{cy+108*math.sin(a):.1f}" r="6" fill="{ORANGE}" stroke="{INK}" stroke-width="1.2"/>'
+b += f'<circle cx="{cx}" cy="{cy}" r="90" fill="#dfe3e8"/>'
+for k in range(20):
+    a = math.radians(k * 18)
+    b += f'<circle cx="{cx+78*math.cos(a):.1f}" cy="{cy+78*math.sin(a):.1f}" r="6" fill="#b0b7c0" stroke="{INK}" stroke-width="1.2"/>'
+b += f'<circle cx="{cx}" cy="{cy}" r="20" fill="{MUTED}"/>'
+tx = ""
+for (px, py), y, nome, desc in (((cx+150, cy-10), 50, "Carcaça com aletas", "protege e dissipa o calor"),
+                                 ((cx+120, cy-60), 105, "Núcleo do estator", "chapas de aço empilhadas"),
+                                 ((cx+76, cy-58), 160, "Enrolamento do estator", "bobinas de cobre nas ranhuras"),
+                                 ((cx+60, cy+52), 230, "Rotor gaiola de esquilo", "barras de alumínio em curto"),
+                                 ((cx+14, cy+14), 300, "Eixo", "apoiado em rolamentos")):
+    tx += f'<polyline points="{px:.0f},{py:.0f} 360,{y-5} 372,{y-5}" fill="none" stroke="{INK}" stroke-width="1.5"/>' + dot(px, py)
+    tx += t(380, y, nome, anc="start", peso="700", tam=14) + t(380, y + 18, desc, MUTED, anc="start", tam=12)
+tx += t(cx, 370, "Corte de um motor de indução (simplificado)", MUTED, tam=12)
+arquivos["mot-partes"] = svg(620, 385, (b, tx))
+
+# 3. placa de identificação
+b = f'<rect x="20" y="20" width="560" height="270" rx="14" fill="#eef0f3" stroke="{MUTED}" stroke-width="2"/>'
+b += "".join(f'<circle cx="{x}" cy="{y}" r="6" fill="#fff" stroke="{MUTED}" stroke-width="1.5"/>' for x in (38, 562) for y in (38, 272))
+tx = t(300, 55, "MOTOR DE INDUÇÃO TRIFÁSICO", peso="800", tam=16) + t(300, 74, "(placa de exemplo)", MUTED, tam=11)
+campos = [[("3~", ""), ("60 Hz", ""), ("Carcaça 90L", "")],
+          [("3,0 cv (2,2 kW)", "p"), ("1730 rpm", "r"), ("FS 1,15", "f")],
+          [("220/380 V", "v"), ("8,6/5,0 A", "i"), ("Ip/In 7,5", "")],
+          [("Isol. F", "c"), ("IP55", ""), ("Regime S1", "")],
+          [("Rend. 84 %", ""), ("cos φ 0,80", ""), ("Cat. N", "")]]
+for li, linha in enumerate(campos):
+    y = 100 + li * 34
+    for ci, (txt, dest) in enumerate(linha):
+        x = 50 + ci * 170
+        cor = "#fff7e6" if dest else "#ffffff"
+        borda = ORANGE if dest else "#cfd5dd"
+        tx += f'<rect x="{x}" y="{y}" width="160" height="28" rx="5" fill="{cor}" stroke="{borda}" stroke-width="1.5"/>' + t(x + 80, y + 19, txt, peso="700", tam=13)
+tx += t(300, 285, "Em destaque: os dados que você mais vai usar no campo.", ORANGE, peso="700", tam=12)
+arquivos["mot-placa"] = svg(600, 300, (b, tx))
+
+# 4. ligações de 6 pontas
+def bloco6(dx, tipo):
+    b, tx = "", ""
+    pos = {6: (dx+60, 70), 4: (dx+130, 70), 5: (dx+200, 70), 1: (dx+60, 150), 2: (dx+130, 150), 3: (dx+200, 150)}
+    b += f'<rect x="{dx+25}" y="40" width="210" height="145" rx="10" fill="#f6f7f9" stroke="{MUTED}" stroke-width="2"/>'
+    if tipo == "D":
+        for a, z in ((6, 1), (4, 2), (5, 3)):
+            b += f'<rect x="{pos[a][0]-9}" y="{pos[a][1]}" width="18" height="{pos[z][1]-pos[a][1]}" rx="5" fill="{ORANGE}" stroke="none"/>'
+    else:
+        b += f'<rect x="{pos[6][0]}" y="{pos[6][1]-9}" width="{pos[5][0]-pos[6][0]}" height="18" rx="5" fill="{ORANGE}" stroke="none"/>'
+    for n, (x, y) in pos.items():
+        tx += f'<circle cx="{x}" cy="{y}" r="15" fill="#fff" stroke="{INK}" stroke-width="2.5"/>' + t(x, y + 5, str(n), peso="800", tam=14)
+    for n, L_ in ((1, "L1"), (2, "L2"), (3, "L3")):
+        x, y = pos[n]
+        b += f'<line x1="{x}" y1="{y+15}" x2="{x}" y2="235" stroke="{RED}" stroke-width="3"/>'
+        tx += t(x, 255, L_, RED, peso="800", tam=13)
+    tit = "Triângulo (Δ) — 220 V" if tipo == "D" else "Estrela (Y) — 380 V"
+    sub = "pontes 6-1, 4-2, 5-3" if tipo == "D" else "ponte unindo 4-5-6"
+    tx += t(dx+130, 24, tit, peso="800", tam=15) + t(dx+130, 282, sub, ORANGE, peso="700", tam=13)
+    return b, tx
+b1, t1 = bloco6(0, "D"); b2, t2 = bloco6(300, "Y")
+tx = t1 + t2 + t(280, 315, "Motor 220/380 V: a mesma bobina, ligada de dois jeitos.", peso="700", tam=14)
+arquivos["mot-6-pontas"] = svg(560, 330, (b1 + b2 + '<line x1="280" y1="20" x2="280" y2="290" stroke="#e2e5ea" stroke-width="2"/>', tx))
+
+# 5. motor monofásico com capacitor de partida
+b, tx = trilhos(40, 480, 40, 340, "Fase", "Neutro")
+b += L((120, 40), (120, 340)) + f'<rect x="104" y="140" width="32" height="90" fill="#fff"/>'
+tx += t(150, 180, "bobina principal", anc="start", peso="700", tam=13) + t(150, 198, "(trabalho)", MUTED, anc="start", tam=12)
+bb, tt = ct(330, 40, 120, "nf", nome="chave centrífuga")
+b += bb; tx += tt
+b += L((330, 120), (330, 170)) + f'<line x1="308" y1="170" x2="352" y2="170" stroke-width="3"/><line x1="308" y1="182" x2="352" y2="182" stroke-width="3"/>'
+b += L((330, 182), (330, 340)) + f'<rect x="314" y="230" width="32" height="70" fill="#fff"/>'
+tx += t(362, 182, "capacitor de partida", anc="start", peso="700", tam=13)
+tx += t(362, 262, "bobina auxiliar", anc="start", peso="700", tam=13) + t(362, 280, "(partida)", MUTED, anc="start", tam=12)
+tx += dot(120, 40) + dot(120, 340) + dot(330, 40) + dot(330, 340)
+tx += t(260, 390, "A chave centrífuga desliga a bobina auxiliar quando o motor chega a ≈ 75 % da rotação.", peso="700", tam=13)
+arquivos["mot-monofasico"] = svg(540, 405, (b, tx))
+
+# 6. megômetro
+b = f'<rect x="300" y="60" width="200" height="150" rx="14" fill="#e9ecf0" stroke="{MUTED}" stroke-width="2"/>'
+b += f'<rect x="330" y="85" width="140" height="45" rx="6" fill="#1b1f24" stroke="none"/>'
+b += f'<circle cx="40" cy="140" r="70" fill="#f6f7f9"/>' + f'<rect x="10" y="40" width="60" height="30" rx="4" fill="#fff"/>'
+for x in (22, 40, 58):
+    b += f'<circle cx="{x}" cy="55" r="5" fill="#fff"/>'
+b += f'<path d="M 22 55 L 58 55" stroke="{ORANGE}" stroke-width="3"/>'
+b += fio([(40, 55), (40, 20), (250, 20), (250, 110), (340, 175)], RED)
+b += fio([(105, 165), (250, 165), (250, 190), (440, 190), (440, 175)], GREEN)
+tx = t(400, 115, "250 MΩ", "#7CFC9A", peso="800", tam=20) + t(400, 160, "500 V CC", peso="700", tam=13)
+tx += f'<circle cx="340" cy="175" r="7" fill="{RED}"/><circle cx="440" cy="175" r="7" fill="{GREEN}"/>'
+tx += t(340, 228, "LINE", RED, peso="800", tam=12) + t(440, 228, "EARTH", GREEN, peso="800", tam=12) + t(400, 52, "megômetro", peso="700", tam=13)
+tx += dot(105, 165) + t(40, 145, "motor", peso="700", tam=14) + t(40, 163, "(carcaça)", MUTED, tam=12)
+tx += t(88, 82, "pontas 1-2-3 (ou todas)", MUTED, anc="start", tam=11) + t(88, 96, "unidas para o teste", MUTED, anc="start", tam=11)
+tx += t(250, 265, "Isolação entre enrolamento e carcaça: motor desligado e desconectado.", peso="700", tam=13)
+arquivos["mot-megometro"] = svg(530, 280, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")

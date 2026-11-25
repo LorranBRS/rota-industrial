@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 0 560 280" font-family="Inter, Arial, Helvetica, sans-serif" font-size="15">
+<defs>
+<marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f5fa8"/></marker>
+<marker id="sv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/></marker>
+</defs>
+<rect x="-30" width="560" height="280" fill="#ffffff"/>
+<g stroke="#1b1f24" stroke-width="2.5" fill="none" stroke-linecap="round">
+<rect x="300" y="60" width="200" height="150" rx="14" fill="#e9ecf0" stroke="#5b6470" stroke-width="2"/><rect x="330" y="85" width="140" height="45" rx="6" fill="#1b1f24" stroke="none"/><circle cx="40" cy="140" r="70" fill="#f6f7f9"/><rect x="10" y="40" width="60" height="30" rx="4" fill="#fff"/><circle cx="22" cy="55" r="5" fill="#fff"/><circle cx="40" cy="55" r="5" fill="#fff"/><circle cx="58" cy="55" r="5" fill="#fff"/><path d="M 22 55 L 58 55" stroke="#e08a00" stroke-width="3"/><polyline points="40,55 40,20 250,20 250,110 340,175" stroke="#c0392b" stroke-width="3"/><polyline points="105,165 250,165 250,190 440,190 440,175" stroke="#1f8a4c" stroke-width="3"/>
+</g>
+<g fill="#1b1f24">
+<text x="400" y="115" text-anchor="middle" fill="#7CFC9A" font-weight="800" font-size="20">250 MΩ</text><text x="400" y="160" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="13">500 V CC</text><circle cx="340" cy="175" r="7" fill="#c0392b"/><circle cx="440" cy="175" r="7" fill="#1f8a4c"/><text x="340" y="228" text-anchor="middle" fill="#c0392b" font-weight="800" font-size="12">LINE</text><text x="440" y="228" text-anchor="middle" fill="#1f8a4c" font-weight="800" font-size="12">EARTH</text><text x="400" y="52" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="13">megômetro</text><circle cx="105" cy="165" r="4.5" fill="#1b1f24"/><text x="40" y="145" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="14">motor</text><text x="40" y="163" text-anchor="middle" fill="#5b6470" font-weight="400" font-size="12">(carcaça)</text><text x="88" y="82" text-anchor="start" fill="#5b6470" font-weight="400" font-size="11">pontas 1-2-3 (ou todas)</text><text x="88" y="96" text-anchor="start" fill="#5b6470" font-weight="400" font-size="11">unidas para o teste</text><text x="250" y="265" text-anchor="middle" fill="#1b1f24" font-weight="700" font-size="13">Isolação entre enrolamento e carcaça: motor desligado e desconectado.</text>
+</g>
+</svg>

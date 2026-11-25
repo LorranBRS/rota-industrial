@@ -166,7 +166,7 @@ window.ROTA = {
       titulo: "Motores Elétricos",
       nivel: "Intermediário",
       cargaHoraria: "12h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "Motor de indução trifásico e monofásico: placa, ligações, testes e manutenção.",
       modulos: [
         { titulo: "Funcionamento", aulas: ["Campo girante", "Motor de indução trifásico", "Motores monofásicos"] },
