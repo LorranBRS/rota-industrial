@@ -342,6 +342,110 @@ tx += t(350, 48, "3 A", BLUE, anc="start", peso="700") + t(390, 135, "4 A", BLUE
 tx += t(210, 262, "O que entra = o que sai: 10 = 3 + 4 + I → I = 3 A", peso="700", tam=15)
 arquivos["cc-lei-dos-nos"] = svg(440, 280, (b, tx))
 
+# ===== Curso: Instalações Elétricas Residenciais =====
+GREEN = "#1f8a4c"
+def fio(pts, cor, w=3):
+    return f'<polyline points="{" ".join(f"{x},{y}" for x, y in pts)}" stroke="{cor}" stroke-width="{w}"/>'
+def tri(x, y, ang=0):
+    return f'<g transform="translate({x},{y}) rotate({ang})"><polygon points="0,-11 10,7 -10,7" fill="#fff" stroke="{INK}" stroke-width="2"/></g>'
+def lampada(cx, cy, r=22):
+    d = r*0.7
+    return (f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="#fff"/>'
+            f'<line x1="{cx-d}" y1="{cy-d}" x2="{cx+d}" y2="{cy+d}"/><line x1="{cx-d}" y1="{cy+d}" x2="{cx+d}" y2="{cy-d}"/>')
+
+# A. planta com simbologia
+b = ('<rect x="20" y="30" width="360" height="270" stroke-width="7"/>'
+     '<line x1="60" y1="300" x2="120" y2="300" stroke="#ffffff" stroke-width="9"/>'
+     '<path d="M 60 300 A 60 60 0 0 1 120 240" stroke-width="1.5" stroke-dasharray="4 3"/>'
+     f'<path d="M 140 282 Q 170 220 190 178" stroke="{MUTED}" stroke-width="2" stroke-dasharray="7 5"/>'
+     f'<path d="M 214 160 Q 300 110 250 44" stroke="{MUTED}" stroke-width="2" stroke-dasharray="7 5"/>'
+     f'<path d="M 186 160 Q 90 150 34 120" stroke="{MUTED}" stroke-width="2" stroke-dasharray="7 5"/>'
+     f'<path d="M 214 170 Q 300 190 366 200" stroke="{MUTED}" stroke-width="2" stroke-dasharray="7 5"/>')
+tx = (f'<circle cx="200" cy="165" r="16" fill="#fff" stroke="{INK}" stroke-width="2.5"/>' + t(200, 171, "1", peso="800", tam=14)
+      + t(200, 200, "220 VA", MUTED, tam=12) + f'<circle cx="140" cy="285" r="9" fill="#fff" stroke="{INK}" stroke-width="2.5"/>'
+      + t(140, 290, "S", peso="800", tam=11) + tri(32, 120, 90) + tri(368, 200, -90) + tri(250, 42, 180)
+      + t(48, 112, "2", anc="start", peso="700", tam=12) + t(352, 192, "2", anc="end", peso="700", tam=12) + t(262, 62, "2", anc="start", peso="700", tam=12)
+      + t(200, 22, "Sala 3,5 × 4,0 m (14 m²)", peso="700", tam=13))
+lx = 415
+tx += f'<rect x="{lx-10}" y="30" width="235" height="270" rx="10" fill="#f6f7f9" stroke="#e2e5ea"/>' + t(lx, 56, "Legenda (exemplo)", anc="start", peso="700")
+tx += f'<circle cx="{lx+12}" cy="88" r="11" fill="#fff" stroke="{INK}" stroke-width="2.5"/>' + t(lx+12, 93, "1", peso="800", tam=11) + t(lx+34, 93, "ponto de luz no teto", anc="start", tam=13)
+tx += f'<circle cx="{lx+12}" cy="128" r="9" fill="#fff" stroke="{INK}" stroke-width="2.5"/>' + t(lx+12, 133, "S", peso="800", tam=11) + t(lx+34, 133, "interruptor simples", anc="start", tam=13)
+tx += tri(lx+12, 168) + t(lx+34, 173, "tomada de uso geral", anc="start", tam=13)
+tx += f'<line x1="{lx}" y1="208" x2="{lx+24}" y2="208" stroke="{MUTED}" stroke-width="2" stroke-dasharray="7 5"/>' + t(lx+34, 213, "eletroduto", anc="start", tam=13)
+tx += t(lx+12, 253, "2", peso="800", tam=14) + t(lx+34, 253, "número do circuito", anc="start", tam=13)
+tx += t(lx, 285, "Cada projeto traz sua legenda.", MUTED, anc="start", tam=11)
+arquivos["res-planta"] = svg(660, 320, (b, tx))
+
+# B. interruptor simples
+b = (fio([(40, 60), (180, 60)], RED) + fio([(250, 60), (460, 60), (460, 108)], ORANGE) + fio([(460, 152), (460, 200), (40, 200)], BLUE)
+     + '<line x1="180" y1="60" x2="240" y2="38" stroke-width="3"/>' + lampada(460, 130))
+tx = dot(180, 60) + dot(250, 60) + t(36, 65, "F", RED, anc="end", peso="800") + t(36, 205, "N", BLUE, anc="end", peso="800")
+tx += t(110, 50, "fase", RED, peso="600", tam=13) + t(355, 50, "retorno", ORANGE, peso="600", tam=13) + t(250, 222, "neutro (direto na lâmpada)", BLUE, peso="600", tam=13)
+tx += t(215, 95, "interruptor", peso="700", tam=13) + t(496, 135, "lâmpada", anc="start", peso="600", tam=13)
+tx += t(270, 252, "O interruptor sempre corta a FASE — nunca o neutro.", peso="700", tam=15)
+arquivos["res-interruptor-simples"] = svg(580, 265, (b, tx))
+
+# C. paralelo + intermediário
+b = (fio([(20, 150), (110, 150)], RED) + '<line x1="110" y1="150" x2="168" y2="114" stroke-width="3"/>'
+     + fio([(175, 110), (300, 110)], ORANGE) + fio([(175, 190), (300, 190)], ORANGE)
+     + '<rect x="300" y="92" width="90" height="116" rx="8" fill="#fff"/>'
+     + '<line x1="312" y1="110" x2="378" y2="110" stroke-width="2.5"/><line x1="312" y1="190" x2="378" y2="190" stroke-width="2.5"/>'
+     + f'<line x1="312" y1="110" x2="378" y2="190" stroke="{MUTED}" stroke-width="2" stroke-dasharray="5 4"/><line x1="312" y1="190" x2="378" y2="110" stroke="{MUTED}" stroke-width="2" stroke-dasharray="5 4"/>'
+     + fio([(390, 110), (515, 110)], ORANGE) + fio([(390, 190), (515, 190)], ORANGE)
+     + '<line x1="580" y1="150" x2="522" y2="114" stroke-width="3"/>'
+     + fio([(580, 150), (640, 150), (640, 112)], ORANGE) + lampada(640, 90) + fio([(640, 68), (640, 30), (20, 30)], BLUE))
+tx = dot(110, 150) + dot(175, 110) + dot(175, 190) + dot(580, 150) + dot(515, 110) + dot(515, 190)
+tx += t(16, 155, "F", RED, anc="end", peso="800") + t(16, 35, "N", BLUE, anc="end", peso="800")
+tx += t(140, 228, "Paralelo 1", peso="700", tam=13) + t(345, 228, "Intermediário", peso="700", tam=13) + t(548, 228, "Paralelo 2", peso="700", tam=13)
+tx += t(240, 100, "2 fios", ORANGE, peso="600", tam=12) + t(452, 100, "2 fios", ORANGE, peso="600", tam=12) + t(672, 95, "lâmpada", anc="start", peso="600", tam=12)
+tx += t(350, 262, "Qualquer um dos três interruptores acende ou apaga a lâmpada.", peso="700", tam=14)
+arquivos["res-paralelo-intermediario"] = svg(740, 278, (b, tx))
+
+# D. quadro de distribuição
+b = f'<rect x="20" y="20" width="620" height="330" rx="12" fill="#f6f7f9" stroke="{MUTED}" stroke-width="2"/>'
+def modulo(x, y, w, h, l1, l2, cor="#ffffff", tracejado=False):
+    d = ' stroke-dasharray="6 4"' if tracejado else ""
+    return (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="6" fill="{cor}" stroke="{INK}" stroke-width="2"{d}/>'
+            + t(x+w/2, y+h/2-2, l1, peso="700", tam=13) + t(x+w/2, y+h/2+16, l2, MUTED, tam=11))
+tx = t(40, 46, "Chegam do medidor: F1, F2, N e PE", MUTED, anc="start", tam=12)
+tx += modulo(45, 60, 90, 80, "Geral", "2P · padrão") + modulo(165, 60, 90, 80, "DR", "2P · 30 mA") + modulo(285, 60, 120, 80, "DPS", "F1, F2, N → PE")
+b += '<line x1="135" y1="100" x2="165" y2="100"/><line x1="210" y1="140" x2="210" y2="170"/><line x1="50" y1="170" x2="440" y2="170"/>'
+for i, (c, d, n) in enumerate((("C1", "10 A", "ilumin."), ("C2", "16 A", "TUG sala/q."), ("C3", "16 A", "TUG coz."), ("C4", "16 A", "TUG serv."), ("C5", "32 A", "chuveiro"))):
+    x = 45 + i*80
+    b += f'<line x1="{x+32}" y1="170" x2="{x+32}" y2="190"/>'
+    tx += modulo(x, 190, 64, 80, c + " " + d, n)
+tx += modulo(455, 190, 75, 80, "reserva", "", tracejado=True) + modulo(545, 190, 75, 80, "reserva", "", tracejado=True)
+tx += f'<rect x="45" y="290" width="575" height="14" rx="4" fill="{BLUE}"/>' + t(332, 301, "barramento de NEUTRO", "#fff", peso="700", tam=11)
+tx += f'<rect x="45" y="318" width="575" height="14" rx="4" fill="{GREEN}"/>' + t(332, 329, "barramento de TERRA (PE)", "#fff", peso="700", tam=11)
+tx += t(420, 100, "ou um DR por grupo de circuitos", MUTED, anc="start", tam=11)
+arquivos["res-quadro"] = svg(660, 365, (b, tx))
+
+# E. aterramento TN-S
+b = (fio([(30, 70), (200, 70)], RED) + fio([(30, 110), (200, 110)], BLUE)
+     + f'<rect x="200" y="40" width="140" height="190" rx="10" fill="#f6f7f9" stroke="{MUTED}" stroke-width="2"/>'
+     + fio([(200, 70), (340, 70), (520, 70), (548, 120)], RED) + fio([(200, 110), (340, 110), (520, 110), (572, 120)], BLUE)
+     + fio([(230, 110), (230, 190), (340, 190), (520, 190), (560, 160)], GREEN)
+     + fio([(270, 190), (270, 265)], GREEN)
+     + '<line x1="250" y1="265" x2="290" y2="265"/><line x1="257" y1="273" x2="283" y2="273"/><line x1="264" y1="281" x2="276" y2="281"/>'
+     + '<circle cx="560" cy="135" r="38" fill="#fff"/>')
+tx = dot(230, 110) + dot(270, 190) + f'<circle cx="548" cy="128" r="5" fill="{INK}"/><circle cx="572" cy="128" r="5" fill="{INK}"/><circle cx="560" cy="150" r="5" fill="{INK}"/>'
+tx += t(30, 62, "Fase", RED, anc="start", peso="700", tam=13) + t(30, 102, "Neutro", BLUE, anc="start", peso="700", tam=13) + t(30, 140, "da rede", MUTED, anc="start", tam=12)
+tx += t(270, 32, "Quadro / entrada", peso="700", tam=13) + t(238, 150, "BEP", GREEN, anc="start", peso="800", tam=13)
+tx += t(300, 268, "haste de aterramento", MUTED, anc="start", tam=12) + t(430, 62, "F", RED, peso="700") + t(430, 102, "N", BLUE, peso="700") + t(430, 182, "PE", GREEN, peso="700")
+tx += t(560, 195, "tomada 2P+T", peso="700", tam=13)
+tx += t(330, 305, "Neutro e terra só se encontram no BEP. Depois seguem SEPARADOS.", peso="700", tam=14)
+arquivos["res-aterramento"] = svg(640, 318, (b, tx))
+
+# F. coordenação Ib ≤ In ≤ Iz
+X = lambda a: 40 + a*11.5
+b = f'<line x1="{X(0)}" y1="110" x2="{X(46)}" y2="110" stroke="{MUTED}" stroke-width="2"/>'
+tx = "".join(f'<line x1="{X(a)}" y1="104" x2="{X(a)}" y2="116" stroke="{MUTED}" stroke-width="1.5"/>' + t(X(a), 134, str(a), MUTED, tam=12) for a in range(0, 46, 5))
+for a, nome, desc, cor, y in ((25, "Ib = 25 A", "corrente do chuveiro", BLUE, 70), (32, "In = 32 A", "disjuntor", ORANGE, 40), (41, "Iz = 41 A", "cabo 6 mm²", GREEN, 70)):
+    tx += f'<circle cx="{X(a)}" cy="110" r="8" fill="{cor}"/>' + f'<line x1="{X(a)}" y1="{y+8}" x2="{X(a)}" y2="100" stroke="{cor}" stroke-width="1.5"/>'
+    tx += t(X(a), y-8, nome, cor, peso="800", tam=14) + t(X(a), y+6, desc, MUTED, tam=11)
+tx += t(300, 175, "Ib ≤ In ≤ Iz   (corrente do circuito ≤ disjuntor ≤ capacidade do cabo)", peso="700", tam=15) + t(X(46), 134, "A", MUTED, anc="end", tam=12)
+arquivos["res-coordenacao"] = svg(600, 195, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")

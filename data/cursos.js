@@ -119,7 +119,7 @@ window.ROTA = {
       titulo: "Instalações Elétricas Residenciais",
       nivel: "Intermediário",
       cargaHoraria: "20h",
-      status: "em-breve",
+      status: "disponivel",
       resumo: "Do projeto à execução: circuitos, dimensionamento de cabos e disjuntores, DR e DPS conforme a NBR 5410.",
       modulos: [
         { titulo: "Planejamento", aulas: ["Leitura de planta baixa", "Previsão de cargas (NBR 5410)", "Divisão de circuitos"] },
