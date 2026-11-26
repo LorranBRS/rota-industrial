@@ -1,0 +1,25 @@
+{
+  "name": "Rota Industrial — Cursos de Elétrica",
+  "short_name": "Rota Industrial",
+  "description": "Cursos gratuitos de elétrica com testes, XP, ranking e certificado.",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./index.html?origem=app",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1d30",
+  "theme_color": "#0f1d30",
+  "categories": ["education"],
+  "icons": [
+    { "src": "assets/icones/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icones/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icones/icone-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icones/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Continuar estudando", "short_name": "Continuar", "url": "./perfil.html?origem=app", "icons": [{ "src": "assets/icones/icone-192.png", "sizes": "192x192" }] },
+    { "name": "Ranking", "url": "./ranking.html?origem=app", "icons": [{ "src": "assets/icones/icone-192.png", "sizes": "192x192" }] },
+    { "name": "Buscar nas aulas", "short_name": "Buscar", "url": "./busca.html?origem=app", "icons": [{ "src": "assets/icones/icone-192.png", "sizes": "192x192" }] }
+  ]
+}

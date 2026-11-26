@@ -20,7 +20,10 @@
     escudo: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="m9 12 2 2 4-4"/>',
     busca: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
     trofeu: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6"/>',
-    livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>'
+    livro: '<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/>',
+    usuario: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+    celular: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18h2"/>',
+    inicio: '<path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h5v-6h4v6h5V9.5"/>'
   };
   const ico = (n) => `<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n] || P.raio}</svg>`;
   const VISUAL = {
@@ -363,6 +366,112 @@
       </div>
       <div class="linha"><span>© ${new Date().getFullYear()} Rota Industrial</span><span>Feito no Brasil 🇧🇷</span></div>
     </div>`;
+  }
+
+  // ---------------------------------------------------------------- versão para celular (app instalável / PWA)
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => { /* sem app offline */ }));
+  }
+  const Instalar = (function () {
+    const ua = navigator.userAgent || "";
+    const ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const android = /android/i.test(ua);
+    const celular = ios || android || window.matchMedia("(max-width: 820px)").matches;
+    const instalado = () => window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+    let pedido = null; // evento beforeinstallprompt (Chrome/Edge/Samsung)
+    const ouvintes = [];
+    const avisar = () => ouvintes.forEach((f) => f());
+    window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); pedido = e; avisar(); });
+    window.addEventListener("appinstalled", () => { pedido = null; gravar("rota-app-instalado", 1); toast("📲", "App instalado!", "Procure o ícone Rota Industrial na tela inicial."); avisar(); });
+
+    function modal() {
+      const ja = document.getElementById("modal-instalar");
+      if (ja) ja.remove();
+      const passos = ios
+        ? `<ol class="passos-instalar">
+            <li>Abra este site no <b>Safari</b> (no iPhone, só ele instala apps da web).</li>
+            <li>Toque no botão <b>Compartilhar</b> <span class="ic-ios">⬆︎</span> na barra de baixo.</li>
+            <li>Role e toque em <b>“Adicionar à Tela de Início”</b>.</li>
+            <li>Toque em <b>Adicionar</b>. Pronto: o ícone ⚡ aparece na tela do celular.</li></ol>`
+        : `<ol class="passos-instalar">
+            <li>Abra o <b>menu do navegador</b> (os três pontinhos <b>⋮</b> no canto).</li>
+            <li>Toque em <b>“Instalar app”</b> ou <b>“Adicionar à tela inicial”</b>.</li>
+            <li>Confirme. O ícone ⚡ Rota Industrial aparece na tela do celular.</li></ol>
+            <p class="nota-mini">Funciona melhor no Chrome. No computador, procure o ícone de instalar na barra de endereço.</p>`;
+      const m = document.createElement("div");
+      m.id = "modal-instalar";
+      m.className = "modal-fundo";
+      m.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mi-titulo">
+          <button class="modal-fechar" aria-label="Fechar">✕</button>
+          <img src="assets/icones/icone-192.png" alt="" width="64" height="64" style="border-radius:16px">
+          <h2 id="mi-titulo">Instale o app no celular</h2>
+          <p class="secao-sub" style="margin:0 0 8px">Fica como um aplicativo: ícone na tela inicial, abre em tela cheia e as aulas já abertas funcionam sem internet.</p>
+          ${passos}
+          <button class="botao botao-primario" style="width:100%" data-fechar>Entendi</button>
+        </div>`;
+      document.body.appendChild(m);
+      const fechar = () => m.remove();
+      m.addEventListener("click", (e) => { if (e.target === m || e.target.closest(".modal-fechar,[data-fechar]")) fechar(); });
+      document.addEventListener("keydown", function esc(e) { if (e.key === "Escape") { fechar(); document.removeEventListener("keydown", esc); } });
+    }
+
+    return {
+      ios, celular,
+      get instalado() { return instalado(); },
+      get disponivel() { return !instalado(); },
+      aoMudar(f) { ouvintes.push(f); },
+      async instalar() {
+        if (pedido) {
+          pedido.prompt();
+          const r = await pedido.userChoice.catch(() => null);
+          pedido = null; avisar();
+          if (r && r.outcome === "dismissed") toast("📲", "Instalação cancelada", "Você pode instalar depois pelo botão Instalar app.");
+          return;
+        }
+        modal();
+      }
+    };
+  })();
+  window.RotaInstalar = Instalar;
+  if (Instalar.instalado) document.documentElement.classList.add("modo-app");
+
+  // botão "Instalar app" no cabeçalho e no menu
+  if (topo && Instalar.disponivel) {
+    const menu = topo.querySelector(".menu");
+    const b = document.createElement("a");
+    b.href = "#instalar";
+    b.className = "menu-instalar";
+    b.innerHTML = `${ico("celular")}Instalar app`;
+    b.addEventListener("click", (e) => { e.preventDefault(); Instalar.instalar(); });
+    menu.appendChild(b);
+    Instalar.aoMudar(() => { if (Instalar.instalado) b.remove(); });
+  }
+
+  // barra de navegação inferior (só no celular, via CSS)
+  if (topo) {
+    const nav = document.createElement("nav");
+    nav.className = "barra-app";
+    nav.setAttribute("aria-label", "Navegação principal");
+    const it = (href, id, txt, icone) => `<a href="${href}" class="${pagina === id ? "ativo" : ""}">${ico(icone)}<span>${txt}</span></a>`;
+    nav.innerHTML = it("index.html", "inicio", "Início", "inicio") + it("cursos.html", "cursos", "Cursos", "livro") + it("busca.html", "busca", "Buscar", "busca")
+      + it("ranking.html", "ranking", "Ranking", "trofeu") + it("perfil.html", "perfil", "Progresso", "usuario");
+    document.body.appendChild(nav);
+    document.body.classList.add("com-barra-app");
+  }
+
+  // cartão "instale o app" na página inicial (celular, ainda não instalado, não dispensado)
+  const elApp = document.getElementById("cartao-app");
+  if (elApp && Instalar.disponivel && !ler("rota-app-dispensado", 0)) {
+    elApp.innerHTML = `<div class="cartao-app">
+        <img src="assets/icones/icone-192.png" alt="" width="56" height="56">
+        <div class="txt"><b>Leve a Rota Industrial no bolso</b><span>Instale o app: ícone na tela inicial, tela cheia e aulas offline.</span></div>
+        <button class="botao botao-primario botao-pequeno" data-instalar>📲 Instalar app</button>
+        <button class="dispensar" aria-label="Dispensar" data-dispensar>✕</button>
+      </div>`;
+    elApp.classList.remove("oculto");
+    elApp.querySelector("[data-instalar]").addEventListener("click", () => Instalar.instalar());
+    elApp.querySelector("[data-dispensar]").addEventListener("click", () => { gravar("rota-app-dispensado", 1); elApp.classList.add("oculto"); });
+    Instalar.aoMudar(() => { if (Instalar.instalado) elApp.classList.add("oculto"); });
   }
 
   // ---------------------------------------------------------------- componentes

@@ -5,7 +5,7 @@ Ao mudar CSS ou JS, aumente VERSAO para o navegador baixar a versão nova.
 """
 import os
 
-VERSAO = "4"
+VERSAO = "5"  # manter igual ao usado em sw.js
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC = "Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, ranking e certificado."
 
@@ -15,11 +15,17 @@ def pagina(arq, titulo, id_pag, main_attr="", corpo="", desc=DESC):
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{titulo}</title>
   <meta name="description" content="{desc}">
   <meta name="theme-color" content="#0f1d30">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f1d30'/><path d='M56 10 24 58h22l-6 32 34-48H52z' fill='%23f5b300'/></svg>">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icones/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Rota Industrial">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -84,7 +90,8 @@ pagina("index.html", "Rota Industrial | Cursos de elétrica com testes, ranking 
       </div>
     </section>
 
-    <div class="container oculto" id="continuar" style="margin-top:28px"></div>
+    <div class="container oculto" id="cartao-app" style="margin-top:20px"></div>
+    <div class="container oculto" id="continuar" style="margin-top:20px"></div>
 
     <section>
       <div class="container">
@@ -181,5 +188,12 @@ pagina("sobre.html", "Sobre | Rota Industrial", "sobre", corpo='''
       <ul><li>Automação industrial (CLP, sensores, inversores)</li><li>Refrigeração e climatização</li><li>Manutenção mecânica</li></ul>
       <p><a class="botao botao-primario" href="cursos.html">Ver cursos</a></p>
     </div></section>''')
+
+pagina("offline.html", "Sem conexão | Rota Industrial", "offline", corpo='''
+    <div class="pagina-topo"><div class="container">
+      <h1>Você está sem internet</h1>
+      <p>Esta página ainda não foi aberta neste aparelho, então não está guardada para uso offline. As aulas que você já abriu continuam disponíveis.</p>
+      <p><a class="botao botao-primario" href="index.html">Ir para o início</a> <a class="botao botao-secundario" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" href="perfil.html">Meu progresso</a></p>
+    </div></div>''')
 
 print("páginas geradas")
