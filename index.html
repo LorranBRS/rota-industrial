@@ -3,40 +3,87 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rota Industrial | Cursos de Elétrica</title>
-  <meta name="description" content="Rota Industrial: cursos online de elétrica para os setores industrial, residencial e comercial.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <title>Rota Industrial | Cursos de elétrica com testes e certificado</title>
+  <meta name="description" content="Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, XP e certificado.">
+  <meta name="theme-color" content="#0f1d30">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f1d30'/><path d='M56 10 24 58h22l-6 32 34-48H52z' fill='%23f5b300'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=3">
 </head>
-<body>
-  <header class="topo">
-    <div class="container">
-      <a class="logo" href="index.html"><span class="logo-icone"><span>RI</span></span> Rota Industrial</a>
-      <button class="menu-botao" aria-label="Abrir menu">☰</button>
-      <nav class="menu">
-        <a href="index.html" class="ativo">Início</a>
-        <a href="cursos.html" >Cursos</a>
-        <a href="sobre.html" >Sobre</a>
-      </nav>
-    </div>
-  </header>
+<body data-pagina="inicio">
+  <header class="topo" id="topo"></header>
   <main>
     <section class="hero">
       <div class="container">
-        <h1>Sua rota para a <em>elétrica profissional</em></h1>
-        <p>Cursos práticos para quem trabalha — ou quer trabalhar — com instalações industriais, residenciais e comerciais. Começando pela área de elétrica.</p>
-        <div class="acoes">
-          <a class="botao botao-primario" href="cursos.html?area=eletrica">Ver cursos de elétrica</a>
-          <a class="botao botao-secundario" href="sobre.html">Conhecer o projeto</a>
+        <div>
+          <span class="hero-tag">⚡ Trilha de Elétrica completa</span>
+          <h1>Sua rota para a <em>elétrica profissional</em></h1>
+          <p>Cursos práticos para quem trabalha — ou quer trabalhar — com instalações industriais, residenciais e comerciais. Estude, responda os testes, ganhe XP e suba de nível.</p>
+          <div class="acoes">
+            <a class="botao botao-primario" href="curso.html?id=matematica-eletricistas">Começar a trilha →</a>
+            <a class="botao botao-secundario" href="cursos.html">Ver catálogo</a>
+          </div>
+          <div class="numeros" id="numeros"></div>
+        </div>
+        <div class="hero-arte"><svg viewBox="0 0 440 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustração: painel com diagrama unifilar e cartões de pontuação">
+  <defs><linearGradient id="pn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d3a60"/><stop offset="1" stop-color="#122842"/></linearGradient></defs>
+  <rect x="40" y="30" width="300" height="320" rx="18" fill="url(#pn)" stroke="#2f5482" stroke-width="2"/>
+  <rect x="40" y="30" width="300" height="16" rx="8" fill="#f5b300" opacity=".9"/>
+  <g fill="none" stroke="#9fc1e8" stroke-width="3" stroke-linecap="round">
+    <path d="M190 70v40"/><path d="M178 110h24"/><path d="M190 110l14-22" stroke="#f5b300"/>
+    <path d="M190 130v40"/><rect x="172" y="170" width="36" height="46" rx="6"/><path d="M190 216v34"/>
+    <circle cx="190" cy="285" r="34"/>
+  </g>
+  <text x="190" y="293" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="24" fill="#fff">M 3~</text>
+  <text x="222" y="98" font-family="Inter, sans-serif" font-size="12" fill="#9fb0c4">Q1</text>
+  <text x="218" y="198" font-family="Inter, sans-serif" font-size="12" fill="#9fb0c4">K1 · F7</text>
+  <g font-family="Inter, sans-serif">
+    <rect x="250" y="64" width="176" height="62" rx="12" fill="#ffffff"/>
+    <circle cx="276" cy="95" r="14" fill="#e1f4e9"/><text x="276" y="100" text-anchor="middle" font-size="14" fill="#1f8a4c">✔</text>
+    <text x="298" y="90" font-size="13" font-weight="800" fill="#16202c">+10 XP</text>
+    <text x="298" y="108" font-size="11.5" fill="#5a6676">Resposta certa</text>
+    <rect x="0" y="196" width="160" height="62" rx="12" fill="#ffffff"/>
+    <text x="16" y="233" font-size="20">🔥</text>
+    <text x="46" y="222" font-size="13" font-weight="800" fill="#16202c">Sequência: 8</text>
+    <text x="46" y="240" font-size="11.5" fill="#5a6676">acertos seguidos</text>
+    <rect x="262" y="300" width="168" height="62" rx="12" fill="#f5b300"/>
+    <text x="284" y="337" font-size="20">🏅</text>
+    <text x="314" y="326" font-size="13" font-weight="800" fill="#0f1d30">Nível 5</text>
+    <text x="314" y="344" font-size="11.5" fill="#3d2e00">Eletricista</text>
+  </g>
+</svg></div>
+      </div>
+    </section>
+
+    <div class="container oculto" id="continuar" style="margin-top:28px"></div>
+
+    <section>
+      <div class="container">
+        <div class="secao-cabeca"><div><div class="eyebrow">Ordem recomendada</div><h2 class="secao-titulo">A trilha de Elétrica</h2></div>
+          <p class="secao-sub">8 cursos, do cálculo básico aos comandos industriais.</p></div>
+        <div class="trilha" id="trilha"></div>
+      </div>
+    </section>
+
+    <section class="faixa">
+      <div class="container">
+        <div class="eyebrow">Como funciona</div><h2 class="secao-titulo">Estude, pratique, evolua</h2>
+        <p class="secao-sub">Tudo gratuito e direto no navegador, sem cadastro.</p>
+        <div class="grade-3" style="margin-top:28px">
+          <div class="cartao etapa"><span class="num">1</span><div class="icone">📘</div><h3>Aulas com diagramas</h3><p>Texto direto ao ponto, exemplos de campo e mais de 50 diagramas desenhados para o curso.</p></div>
+          <div class="cartao etapa"><span class="num">2</span><div class="icone">📝</div><h3>Testes com nota</h3><p>Cada aula termina com um teste de múltipla escolha. Acerte, ganhe XP e mantenha a sequência 🔥.</p></div>
+          <div class="cartao etapa"><span class="num">3</span><div class="icone">🏆</div><h3>Níveis e certificado</h3><p>Suba de Aprendiz a Mestre da Rota, colecione medalhas e emita o certificado de cada curso.</p></div>
         </div>
       </div>
     </section>
 
     <section>
       <div class="container">
-        <h2 class="secao-titulo">Três setores, uma rota</h2>
+        <div class="eyebrow">Para cada tipo de obra</div><h2 class="secao-titulo">Três setores, uma rota</h2>
         <p class="secao-sub">Cada curso indica para qual tipo de instalação ele prepara você.</p>
-        <div class="grade">
+        <div class="grade-3">
           <a class="cartao" href="cursos.html?setor=residencial"><div class="icone">🏠</div><h3>Residencial</h3><p>Casas e apartamentos: tomadas, iluminação, quadros, DR e DPS.</p></a>
           <a class="cartao" href="cursos.html?setor=comercial"><div class="icone">🏬</div><h3>Comercial</h3><p>Lojas, escritórios e prédios: trifásico, iluminação e eficiência.</p></a>
           <a class="cartao" href="cursos.html?setor=industrial"><div class="icone">🏭</div><h3>Industrial</h3><p>Fábricas: motores, comandos elétricos, painéis e automação.</p></a>
@@ -46,28 +93,14 @@
 
     <section style="padding-top:0">
       <div class="container">
-        <h2 class="secao-titulo">Áreas de formação</h2>
+        <div class="eyebrow">Roteiro</div><h2 class="secao-titulo">Áreas de formação</h2>
         <p class="secao-sub">Começamos pela elétrica. As próximas áreas já estão no roteiro.</p>
         <div class="grade" id="lista-areas"></div>
       </div>
-    </section>
-
-    <section style="padding-top:0">
-      <div class="container">
-        <h2 class="secao-titulo">Primeiros cursos</h2>
-        <p class="secao-sub">Grade da trilha de elétrica em produção.</p>
-        <div class="grade" id="cursos-destaque"></div>
-        <p style="margin-top:24px"><a class="botao botao-secundario" href="cursos.html">Ver catálogo completo →</a></p>
-      </div>
-    </section>
-  </main>
-  <footer class="rodape-site">
-    <div class="container">
-      <span>© <span data-ano></span> Rota Industrial — Cursos de elétrica industrial, residencial e comercial.</span>
-      <span>Feito no Brasil 🇧🇷</span>
-    </div>
-  </footer>
-  <script src="data/cursos.js"></script>
-  <script src="assets/js/main.js"></script>
+    </section></main>
+  <footer class="rodape-site" id="rodape"></footer>
+  <script src="data/cursos.js?v=2"></script>
+  <script src="data/quizzes.js?v=2"></script>
+  <script src="assets/js/main.js?v=2"></script>
 </body>
 </html>
