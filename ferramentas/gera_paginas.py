@@ -5,7 +5,7 @@ Ao mudar CSS ou JS, aumente VERSAO para o navegador baixar a versão nova.
 """
 import os
 
-VERSAO = "5"  # manter igual ao usado em sw.js
+VERSAO = "6"  # manter igual ao usado em sw.js
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC = "Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, ranking e certificado."
 

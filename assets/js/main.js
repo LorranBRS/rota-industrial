@@ -459,6 +459,17 @@
     document.body.classList.add("com-barra-app");
   }
 
+  // botão "Instalar app" no topo da página inicial (só no celular)
+  const acoesHero = document.querySelector(".hero .acoes");
+  if (acoesHero && Instalar.disponivel && Instalar.celular) {
+    const b = document.createElement("button");
+    b.className = "botao botao-secundario";
+    b.innerHTML = "📲 Instalar app";
+    b.addEventListener("click", () => Instalar.instalar());
+    acoesHero.appendChild(b);
+    Instalar.aoMudar(() => { if (Instalar.instalado) b.remove(); });
+  }
+
   // cartão "instale o app" na página inicial (celular, ainda não instalado, não dispensado)
   const elApp = document.getElementById("cartao-app");
   if (elApp && Instalar.disponivel && !ler("rota-app-dispensado", 0)) {

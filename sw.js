@@ -1,10 +1,10 @@
 // Rota Industrial — service worker (app instalável e leitura offline)
-// Ao publicar mudanças no site, aumente VERSAO para os celulares baixarem os arquivos novos.
-const VERSAO = "rota-v5";
+// Ao publicar mudanças no site, aumente VERSAO aqui E em ferramentas/gera_paginas.py (os ?v= precisam bater).
+const VERSAO = "rota-v6";
 const BASICO = [
   "./", "index.html", "cursos.html", "curso.html", "aula.html", "busca.html", "perfil.html", "ranking.html",
   "certificado.html", "verificar.html", "sobre.html", "offline.html", "manifest.webmanifest",
-  "assets/css/style.css?v=5", "assets/js/main.js?v=5", "data/cursos.js?v=5", "data/quizzes.js?v=5",
+  "assets/css/style.css?v=6", "assets/js/main.js?v=6", "data/cursos.js?v=6", "data/quizzes.js?v=6",
   "assets/icones/icone-192.png", "assets/icones/icone-512.png", "assets/icones/apple-touch-icon.png"
 ];
 

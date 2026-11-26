@@ -47,6 +47,14 @@ Site estático (HTML, CSS e JavaScript puro), publicado pelo **GitHub Pages** a 
 - A chave no `main.js` é a chave **publicável** (pública por definição).
 - Ao criar um curso novo, atualize a tabela `privado.cursos` (aulas e testes), senão o certificado online não libera.
 
+## Versão para celular (app instalável / PWA)
+
+- `manifest.webmanifest` + ícones em `assets/icones/` (gerados por `python3 ferramentas/gera_icones.py`).
+- `sw.js` guarda o site para uso offline: páginas pela rede (cache se sem internet), arquivos pelo cache (atualiza em segundo plano). O Supabase nunca passa pelo cache.
+- Botão **Instalar app**: no Android/Chrome abre a instalação nativa; no iPhone mostra o passo a passo (Safari → Compartilhar → Adicionar à Tela de Início).
+- No celular aparece a barra de navegação inferior.
+- **Ao publicar mudanças**: aumente `VERSAO` em `sw.js` e em `ferramentas/gera_paginas.py` (os `?v=` precisam ser iguais) e rode o gerador.
+
 ## Páginas HTML
 
 Geradas por `python3 ferramentas/gera_paginas.py` (mesmo cabeçalho em todas). Ao mudar CSS/JS, aumente `VERSAO` no script.
