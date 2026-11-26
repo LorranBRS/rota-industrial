@@ -15,6 +15,8 @@ aula.html         Página de aula (?curso=<id>&aula=<módulo>-<aula>) com teste 
 busca.html        Busca em todas as aulas (?q=disjuntor)
 perfil.html       Meu progresso: XP, nível, sequência, medalhas, ranking pessoal, exportar/importar
 certificado.html  Certificado de conclusão (?curso=<id>), liberado com 100% das aulas e >= 70% nos testes
+ranking.html      Ranking geral online (geral, semana, sequência, média)
+verificar.html    Verificação pública de certificado (?c=RI-XXXXX-XXXXX)
 sobre.html        Sobre o projeto
 data/cursos.js    Catálogo: áreas, setores, cursos, módulos e aulas
 data/aulas/       Texto de cada aula (um arquivo por curso)
@@ -35,7 +37,19 @@ Site estático (HTML, CSS e JavaScript puro), publicado pelo **GitHub Pages** a 
 
 - Concluir aula: +20 XP · acertar questão (1ª resposta): +10 XP · gabarito na 1ª tentativa: +20 XP · concluir curso: +100 XP
 - 10 níveis (Aprendiz → Mestre da Rota), 15 medalhas, sequência de acertos e dias seguidos
-- Tudo em `localStorage` (`rota-aluno` e `rota-progresso`). O ranking geral entre alunos ficará para quando houver banco online.
+- Tudo em `localStorage` (`rota-aluno` e `rota-progresso`).
+
+## Ranking online (Supabase)
+
+- Projeto Supabase `rota-industrial` (região São Paulo). Esquema e funções em `supabase/001_ranking.sql`.
+- Sem e-mail e sem senha: o aluno escolhe um apelido e recebe um **código de acesso** aleatório (o banco guarda só o hash).
+- O site chama só funções RPC (`rota_salvar`, `rota_ranking`, `rota_minha_posicao`, `rota_carregar`, `rota_emitir_certificado`, `rota_verificar_certificado`, `rota_apagar`). As tabelas ficam no schema `privado`, fora da API.
+- A chave no `main.js` é a chave **publicável** (pública por definição).
+- Ao criar um curso novo, atualize a tabela `privado.cursos` (aulas e testes), senão o certificado online não libera.
+
+## Páginas HTML
+
+Geradas por `python3 ferramentas/gera_paginas.py` (mesmo cabeçalho em todas). Ao mudar CSS/JS, aumente `VERSAO` no script.
 
 ## Rodar localmente
 
