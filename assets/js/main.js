@@ -917,7 +917,8 @@
     if (window.ROTA_AULAS[cid]) return Promise.resolve(window.ROTA_AULAS[cid]);
     return new Promise((ok) => {
       const s = document.createElement("script");
-      s.src = `data/aulas/${cid}.js`;
+      const v = ((document.querySelector('script[src*="main.js"]') || {}).src || "").split("v=")[1] || "1";
+      s.src = `data/aulas/${cid}.js?v=${v}`;
       s.onload = s.onerror = () => ok(window.ROTA_AULAS[cid] || {});
       document.body.appendChild(s);
     });

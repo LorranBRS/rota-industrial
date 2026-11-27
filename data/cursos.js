@@ -149,14 +149,17 @@ window.ROTA = {
       setores: ["industrial"],
       titulo: "Comandos Elétricos Industriais",
       nivel: "Intermediário",
-      cargaHoraria: "24h",
+      cargaHoraria: "36h",
       status: "disponivel",
-      resumo: "Contatores, relés, partida direta, reversora e estrela-triângulo. Leitura e montagem de diagramas.",
+      resumo: "Contatores, relés e diagramas; partidas direta, reversora, estrela-triângulo, compensadora, série-paralelo e Dahlander; frenagem, sensores, relés de proteção e dimensionamento.",
       modulos: [
         { titulo: "Componentes", aulas: ["Contatores", "Relé térmico e disjuntor-motor", "Botoeiras, sinaleiros e temporizadores"] },
         { titulo: "Diagramas", aulas: ["Simbologia", "Diagrama de força x comando", "Selo e intertravamento"] },
         { titulo: "Partidas de motores", aulas: ["Partida direta", "Partida com reversão", "Partida estrela-triângulo", "Soft-starter e inversor (introdução)"] },
-        { titulo: "Manutenção", aulas: ["Diagnóstico de falhas em painéis", "Boas práticas de montagem"] }
+        { titulo: "Manutenção", aulas: ["Diagnóstico de falhas em painéis", "Boas práticas de montagem"] },
+        { titulo: "Partidas especiais", aulas: ["Partida compensadora (autotransformador)", "Partida série-paralelo e comparação das partidas", "Motor de duas velocidades (Dahlander)", "Frenagem de motores"] },
+        { titulo: "Automação com comandos", aulas: ["Sensores e chaves de comando", "Partidas sequenciais e bomba com boia", "Relés de proteção e monitoramento"] },
+        { titulo: "Dimensionamento", aulas: ["Fusíveis NH e Diazed", "Transformador de comando", "Dimensionando uma partida completa"] }
       ]
     },
     {

@@ -5,7 +5,7 @@ Ao mudar CSS ou JS, aumente VERSAO para o navegador baixar a versão nova.
 """
 import os
 
-VERSAO = "9"  # manter igual ao usado em sw.js
+VERSAO = "10"  # manter igual ao usado em sw.js
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC = "Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, ranking e certificado."
 
@@ -167,7 +167,7 @@ pagina("busca.html", "Buscar nas aulas | Rota Industrial", "busca", ' id="pagina
     <div class="pagina-topo"><div class="container">
       <div class="migalha"><a href="index.html">Início</a> › Buscar</div>
       <h1>Buscar nas aulas</h1>
-      <p>Procure um assunto em todas as 89 aulas: fórmulas, normas, componentes, ligações.</p>
+      <p>Procure um assunto em todas as aulas: fórmulas, normas, componentes, ligações.</p>
       <form class="campo-busca" id="form-busca" role="search"><input id="q" type="search" placeholder="Ex.: disjuntor curva C, estrela-triângulo, NR-10" autocomplete="off" autofocus aria-label="Buscar"></form>
     </div></div>
     <section><div class="container" style="max-width:860px" id="resultados"></div></section>''')

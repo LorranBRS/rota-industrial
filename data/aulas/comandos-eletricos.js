@@ -604,6 +604,442 @@ window.ROTA_AULAS = window.ROTA_AULAS || {};
         Em <strong>paralelo</strong> entre si: S1 do painel, S1 da casa de bombas e o selo K1 13-14. Sinaleiro H1 por um auxiliar NA de K1.
         Relé térmico ajustado em 8,6 A e contator ≥ 8,6 A em AC-3.</p></details>
       `
+    },
+
+    "5-1": {
+      duracao: "13 min de leitura",
+      texto: `
+        <h2>Quando a estrela-triângulo não serve</h2>
+        <p>A partida estrela-triângulo exige um motor com <strong>6 pontas acessíveis</strong> e que trabalhe em triângulo na tensão da rede.
+        Muitos motores grandes, bombas submersas e compressores não atendem a isso. Para eles existe a <strong>partida compensadora</strong>,
+        que reduz a tensão na partida usando um <strong>autotransformador</strong>.</p>
+        ${seg}
+
+        <h2>O que é o autotransformador</h2>
+        <p>É um transformador com um enrolamento só, que tem <strong>derivações</strong> (taps): pontos de saída a 50 %, 65 % e 80 % da tensão de entrada.
+        Ligando o motor numa derivação, ele parte com tensão reduzida. Depois de alguns segundos, o motor passa para a tensão plena da rede.</p>
+        ${fig("cmd-compensadora", "Esquema unifilar da partida compensadora com autotransformador, contatores K1, K2 e K3 e tabela de etapas", "Esquema simplificado de uma fase e a sequência dos contatores.")}
+
+        <h2>A sequência de comando</h2>
+        <ol>
+          <li><strong>Partida:</strong> K3 fecha o ponto comum (estrela) do autotransformador e K2 liga o motor na derivação. O motor recebe, por exemplo, 65 % da tensão.</li>
+          <li><strong>Transição:</strong> depois do tempo ajustado no temporizador, K3 abre. Por um instante, parte do enrolamento fica em série com o motor (funciona como um reator)
+          e o motor <strong>não fica sem tensão</strong>. Isso evita o "tranco" e o pico de corrente da troca.</li>
+          <li><strong>Regime:</strong> K1 liga o motor direto na rede e K2 desliga. O autotransformador sai do circuito.</li>
+        </ol>
+        <p>K1 e K2/K3 são <strong>intertravados</strong>: nunca podem estar fechados ao mesmo tempo, senão a rede fica em curto através do autotransformador.</p>
+
+        <h2>Quanto a corrente cai</h2>
+        <p>Com uma derivação de <em>k</em> (por exemplo, k = 0,65), o motor recebe k vezes a tensão e puxa k vezes a corrente de partida.
+        Mas o autotransformador também "transforma" a corrente: do lado da rede, a corrente fica <strong>k²</strong> vezes a da partida direta.
+        O conjugado (torque) do motor também cai para <strong>k²</strong>.</p>
+        <table>
+          <tr><th>Derivação</th><th>Tensão no motor</th><th>Corrente na rede</th><th>Conjugado de partida</th></tr>
+          <tr><td>50 %</td><td>0,50 × U</td><td>≈ 25 %</td><td>≈ 25 %</td></tr>
+          <tr><td>65 %</td><td>0,65 × U</td><td>≈ 42 %</td><td>≈ 42 %</td></tr>
+          <tr><td>80 %</td><td>0,80 × U</td><td>≈ 64 %</td><td>≈ 64 %</td></tr>
+        </table>
+        <div class="destaque"><strong>Exemplo:</strong> um motor de 30 cv em 380 V tem In ≈ 42 A e Ip/In = 7. Na partida direta, puxaria cerca de 7 × 42 ≈ 294 A.
+        Na derivação de 65 %, a rede vê ≈ 0,42 × 294 ≈ <strong>124 A</strong>, e o motor ainda parte com 42 % do conjugado.</div>
+
+        <h2>Vantagens e cuidados</h2>
+        <ul>
+          <li><strong>Funciona com motor de 3 pontas</strong> e em qualquer tensão.</li>
+          <li><strong>Dá para escolher</strong> a derivação: se a carga é pesada e o motor não sai do lugar com 65 %, passa-se para 80 %.</li>
+          <li>Transição sem interrupção (menos pico na troca que a estrela-triângulo).</li>
+          <li>Cuidados: o autotransformador é <strong>caro e pesado</strong> e esquenta. Ele tem um limite de <strong>partidas por hora</strong>, informado pelo fabricante.
+          Muitos trazem um <strong>termostato</strong> interno que deve entrar no comando.</li>
+        </ul>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Na derivação de 80 %, a corrente na rede fica em torno de quantos % da partida direta?</summary><p>0,80² = 0,64 → <strong>cerca de 64 %</strong>.</p></details>
+        <details><summary>2. Por que K1 não pode fechar enquanto K2 e K3 estão fechados?</summary><p>Porque a rede ficaria em <strong>curto-circuito</strong> através do autotransformador. Por isso eles são intertravados.</p></details>
+        <details><summary>3. Um motor tem só 3 pontas acessíveis e precisa de partida com tensão reduzida. Estrela-triângulo ou compensadora?</summary><p><strong>Compensadora</strong> (ou soft-starter/inversor). A estrela-triângulo exige 6 pontas.</p></details>
+      `
+    },
+
+    "5-2": {
+      duracao: "12 min de leitura",
+      texto: `
+        <h2>Partida série-paralelo</h2>
+        <p>Motores de <strong>12 pontas</strong> (ou 9) podem ser ligados em dois níveis de tensão: um o dobro do outro (por exemplo, 220 V e 440 V).
+        Na ligação para a tensão maior, as meias-bobinas de cada fase ficam <strong>em série</strong>. Na ligação para a tensão menor, ficam <strong>em paralelo</strong>.</p>
+        <p>A partida série-paralelo usa isso: numa rede de 220 V, o motor <strong>parte ligado como se fosse para 440 V</strong> (série) e, depois de alguns segundos,
+        passa para a ligação de 220 V (paralelo).</p>
+        ${seg}
+
+        <h2>Por que a corrente cai para 1/4</h2>
+        <p>Em série, cada meia-bobina recebe <strong>metade</strong> da tensão para a qual foi feita. Com metade da tensão, a corrente de cada caminho cai pela metade,
+        e como agora há um caminho só (em vez de dois em paralelo), a corrente puxada da rede fica com <strong>1/4</strong> da partida direta.
+        O conjugado também cai para cerca de <strong>1/4</strong>, porque depende do quadrado da tensão.</p>
+        <div class="destaque">Por causa do conjugado baixo (≈ 25 %), a série-paralelo é indicada para partidas <strong>em vazio</strong> ou com carga leve: bombas centrífugas com
+        válvula fechada, ventiladores, máquinas que só recebem carga depois de embalar.</div>
+
+        <h2>As ligações (motor 12 pontas, exemplo)</h2>
+        <p>Usando a numeração de exemplo do curso de Motores (confira sempre a placa do seu motor):</p>
+        <table>
+          <tr><th>Etapa</th><th>Ligação</th><th>L1</th><th>L2</th><th>L3</th><th>Unir</th></tr>
+          <tr><td>Partida (série)</td><td>Δ série (de 440 V)</td><td>1-12</td><td>2-10</td><td>3-11</td><td>4-7, 5-8, 6-9</td></tr>
+          <tr><td>Regime (paralelo)</td><td>ΔΔ (de 220 V)</td><td>1-6-7-12</td><td>2-4-8-10</td><td>3-5-9-11</td><td>—</td></tr>
+        </table>
+        <p>No painel, isso é feito com <strong>três contatores</strong>: um que alimenta o motor, um que faz as ligações da série e outro que faz as do paralelo,
+        com <strong>intertravamento</strong> entre série e paralelo e um temporizador para a troca, igual à lógica da estrela-triângulo.</p>
+
+        <h2>Comparando as partidas</h2>
+        <table>
+          <tr><th>Partida</th><th>Corrente na rede</th><th>Conjugado</th><th>Exige</th></tr>
+          <tr><td>Direta</td><td>100 % (6 a 8 × In)</td><td>100 %</td><td>Rede que aguente o pico</td></tr>
+          <tr><td>Estrela-triângulo</td><td>≈ 33 %</td><td>≈ 33 %</td><td>Motor de 6 pontas em Δ na tensão da rede</td></tr>
+          <tr><td>Compensadora</td><td>25 %, 42 % ou 64 %</td><td>igual à corrente</td><td>Autotransformador</td></tr>
+          <tr><td>Série-paralelo</td><td>≈ 25 %</td><td>≈ 25 %</td><td>Motor de 9 ou 12 pontas, dupla tensão</td></tr>
+          <tr><td>Soft-starter</td><td>ajustável (2 a 4 × In, típico)</td><td>ajustável</td><td>Equipamento eletrônico</td></tr>
+          <tr><td>Inversor de frequência</td><td>perto da nominal</td><td>alto, controlado</td><td>Equipamento eletrônico (controla a velocidade)</td></tr>
+        </table>
+        <p>Regra prática para escolher: <strong>a concessionária e a rede</strong> dizem até quanto a corrente pode subir; <strong>a carga</strong> diz quanto conjugado é preciso para sair do lugar.
+        A partida escolhida tem que atender as duas coisas.</p>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Na partida série-paralelo, a corrente na rede cai para aproximadamente quanto da partida direta?</summary><p>Para <strong>cerca de 1/4 (25 %)</strong>.</p></details>
+        <details><summary>2. Uma correia transportadora parte carregada e precisa de conjugado alto. A série-paralelo é uma boa escolha?</summary><p><strong>Não</strong>: o conjugado de partida cai para cerca de 25 %. Melhor uma compensadora com derivação alta, soft-starter bem ajustado ou inversor.</p></details>
+      `
+    },
+
+    "5-3": {
+      duracao: "12 min de leitura",
+      texto: `
+        <h2>Duas velocidades num motor só</h2>
+        <p>A rotação de um motor de indução depende do <strong>número de polos</strong> (n = 120 × f ÷ p, visto no curso de Motores). Para ter duas velocidades
+        sem inversor, existem dois caminhos:</p>
+        <ul>
+          <li><strong>Dois enrolamentos independentes</strong> no mesmo motor, cada um com um número de polos (permite qualquer relação, por exemplo 6/4 polos).</li>
+          <li><strong>Ligação Dahlander</strong>: um enrolamento só, que muda o número de polos conforme a ligação. A relação é sempre <strong>2 para 1</strong> (4/2, 8/4 polos…).</li>
+        </ul>
+        <p>Aplicações: ventiladores e exaustores (alta no calor, baixa no resto do tempo), máquinas-ferramenta, elevadores de carga antigos, misturadores.</p>
+        ${seg}
+
+        <h2>As ligações Dahlander</h2>
+        ${fig("cmd-dahlander", "Ligação Dahlander: baixa velocidade em triângulo com terminais 1, 2 e 3 alimentados; alta velocidade em dupla estrela com 4, 5 e 6 alimentados e 1-2-3 unidos", "Baixa em triângulo (Δ) e alta em dupla estrela (YY).")}
+        <ul>
+          <li><strong>Baixa velocidade:</strong> rede em 1, 2 e 3. Os terminais 4, 5 e 6 (no meio de cada lado do triângulo) ficam <strong>livres e isolados</strong>.</li>
+          <li><strong>Alta velocidade:</strong> rede em 4, 5 e 6 e os terminais 1, 2 e 3 <strong>unidos</strong> entre si (fecham o centro da dupla estrela).</li>
+        </ul>
+
+        <h2>Os contatores</h2>
+        <ul>
+          <li><strong>K1</strong> liga a rede em 1-2-3 (baixa).</li>
+          <li><strong>K2</strong> liga a rede em 4-5-6 e <strong>K3</strong> une 1-2-3 (alta). K2 e K3 trabalham juntos.</li>
+          <li>K1 é <strong>intertravado</strong> com K2 e K3 (elétrico e, de preferência, mecânico). Se K1 e K3 fechassem juntos, a rede entraria em curto.</li>
+          <li>Cada velocidade tem a sua corrente nominal, por isso são usados <strong>dois relés térmicos</strong> (um para baixa, outro para alta), cada um ajustado pela placa.</li>
+        </ul>
+        <div class="destaque alerta">Ao passar da <strong>alta para a baixa</strong> com o motor girando, ele vira gerador por alguns instantes e freia bruscamente: corrente alta e tranco
+        na mecânica. Em muitos projetos, o comando obriga a <strong>parar antes</strong> de trocar de alta para baixa (ou usa um tempo de espera).</div>
+        <p>Confira também o <strong>sentido de giro</strong> nas duas velocidades. Dependendo do fabricante, pode ser preciso trocar duas fases na ligação de alta para o
+        motor girar para o mesmo lado. Siga sempre o esquema da placa.</p>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Um motor Dahlander 4/2 polos em 60 Hz tem quais velocidades síncronas?</summary><p>120 × 60 ÷ 4 = 1.800 rpm (baixa) e 120 × 60 ÷ 2 = <strong>3.600 rpm</strong> (alta).</p></details>
+        <details><summary>2. Em alta velocidade (YY), o que acontece com os terminais 1, 2 e 3?</summary><p>Ficam <strong>unidos entre si</strong> (por K3), formando o centro da dupla estrela. A rede entra em 4, 5 e 6.</p></details>
+        <details><summary>3. Por que usar dois relés térmicos num comando Dahlander?</summary><p>Porque a <strong>corrente nominal é diferente</strong> em cada velocidade. Cada relé é ajustado para a corrente da sua velocidade.</p></details>
+      `
+    },
+
+    "5-4": {
+      duracao: "11 min de leitura",
+      texto: `
+        <h2>Parar também é um projeto</h2>
+        <p>Ao desligar, o motor para "sozinho", só pelo atrito. Em máquinas com muita inércia (serras, centrífugas, volantes) isso pode levar minutos.
+        Em outras, parar rápido é questão de <strong>segurança</strong> (NR-12) ou de precisão. Por isso existem métodos de frenagem.</p>
+        ${seg}
+
+        <h2>1) Freio eletromagnético (motofreio)</h2>
+        <p>Um disco de freio é apertado por <strong>molas</strong>. Uma bobina, alimentada junto com o motor, puxa o disco e <strong>libera</strong> o eixo. Desligou o motor
+        (ou faltou energia), a bobina solta e as molas <strong>freiam</strong>. Por isso é chamado de freio de segurança: freia na falta de energia.
+        É usado em talhas, pontes rolantes, portões e esteiras inclinadas.</p>
+
+        <h2>2) Frenagem por injeção de corrente contínua</h2>
+        ${fig("cmd-frenagem", "Frenagem por injeção de corrente contínua: K1 alimenta o motor, K2 injeta CC em duas fases a partir de um retificador; gráfico mostra parada mais rápida", "K1 desliga e K2 injeta CC por alguns segundos.")}
+        <p>Depois que K1 desliga, o contator <strong>K2</strong> aplica <strong>corrente contínua</strong> em duas fases do motor, vinda de um transformador com retificador.
+        A CC cria um campo magnético <strong>parado</strong>. O rotor, que ainda gira, é "segurado" por esse campo e para rápido, sem inverter o sentido.</p>
+        <ul>
+          <li>K1 e K2 são <strong>intertravados</strong> (CA e CC nunca juntas no motor).</li>
+          <li>Um <strong>temporizador</strong> limita o tempo da injeção (alguns segundos). CC por muito tempo aquece o motor parado.</li>
+          <li>Não segura a carga parada: depois que o motor para, não há mais conjugado de frenagem. Para segurar (talhas), use freio mecânico.</li>
+        </ul>
+
+        <h2>3) Frenagem por contracorrente</h2>
+        <p>Inverte-se a ordem de duas fases com o motor ainda girando (como na reversão). O campo passa a girar ao contrário e freia o rotor com força.
+        É a frenagem mais brusca e a que mais exige do motor e da rede (corrente muito alta). E tem um perigo: se não houver nada para desligar exatamente
+        quando a rotação chega a zero, o motor <strong>começa a girar ao contrário</strong>. Por isso é usado um <strong>relé de rotação nula</strong> (sensor de velocidade).</p>
+
+        <h2>4) Frenagem com inversor de frequência</h2>
+        <p>O inversor reduz a frequência aos poucos e controla a parada (rampa de desaceleração). A energia que volta do motor vai para um <strong>resistor de frenagem</strong>
+        ou de volta para a rede (inversores regenerativos). Hoje é a solução mais comum em máquinas novas.</p>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Num motofreio, o que acontece com o freio se faltar energia?</summary><p>A bobina solta e as <strong>molas aplicam o freio</strong>. Ele freia na falta de energia (freio de segurança).</p></details>
+        <details><summary>2. Por que a injeção de CC precisa de um temporizador?</summary><p>Para <strong>limitar o tempo</strong> de aplicação da CC. Com o motor parado, a CC só aqueceria os enrolamentos.</p></details>
+        <details><summary>3. Qual o risco da frenagem por contracorrente sem relé de rotação nula?</summary><p>O motor <strong>começar a girar no sentido contrário</strong> depois de parar.</p></details>
+      `
+    },
+    "6-1": {
+      duracao: "13 min de leitura",
+      texto: `
+        <h2>O comando que "sente" a máquina</h2>
+        <p>Até aqui, quem mandava ligar e desligar era o operador, pelos botões. Na automação, quem manda são os <strong>sensores e chaves</strong> que percebem
+        posição, presença, nível, pressão ou temperatura. Para o comando, todos eles são, no fim, <strong>contatos NA ou NF</strong> que abrem e fecham.</p>
+        ${seg}
+
+        <h2>Chaves mecânicas</h2>
+        <table>
+          <tr><th>Dispositivo</th><th>O que detecta</th><th>Exemplo de uso</th></tr>
+          <tr><td>Chave fim de curso</td><td>Posição: uma peça encosta no rolete ou haste</td><td>Portão abriu até o fim, mesa chegou ao limite</td></tr>
+          <tr><td>Pressostato</td><td>Pressão do ar, água ou óleo</td><td>Compressor liga a 6 bar e desliga a 8 bar</td></tr>
+          <tr><td>Termostato</td><td>Temperatura</td><td>Liga o exaustor quando o painel passa de 40 °C</td></tr>
+          <tr><td>Chave boia</td><td>Nível de líquido</td><td>Bomba de caixa d'água</td></tr>
+          <tr><td>Chave seletora</td><td>Escolha do operador</td><td>Manual – 0 – Automático</td></tr>
+        </table>
+        <p>O pressostato e o termostato têm um <strong>diferencial</strong> (histerese): ligam num valor e desligam em outro. Sem isso, o contator ficaria ligando e
+        desligando sem parar perto do ponto ajustado.</p>
+
+        <h2>Sensores eletrônicos (sem contato físico)</h2>
+        <ul>
+          <li><strong>Indutivo:</strong> detecta <strong>metal</strong> a poucos milímetros. Muito usado para contar peças e detectar posição de cilindros.</li>
+          <li><strong>Capacitivo:</strong> detecta <strong>qualquer material</strong> (plástico, madeira, grãos, líquido através de parede de plástico). Útil para nível de silos.</li>
+          <li><strong>Fotoelétrico:</strong> usa um feixe de luz. Pode ser de <strong>barreira</strong> (emissor e receptor separados, maior alcance),
+          <strong>retrorreflexivo</strong> (com espelho) ou <strong>difuso</strong> (a própria peça reflete).</li>
+        </ul>
+
+        <h2>Sensores de 3 fios: PNP e NPN</h2>
+        <p>A maioria trabalha em <strong>24 Vcc</strong> com 3 fios: marrom (+24 V), azul (0 V) e preto (saída).</p>
+        <ul>
+          <li><strong>PNP</strong>: quando detecta, a saída <strong>fornece +24 V</strong>. A carga (relé, entrada do CLP) fica entre a saída e o 0 V. É o padrão mais comum no Brasil e na Europa.</li>
+          <li><strong>NPN</strong>: quando detecta, a saída <strong>liga ao 0 V</strong>. A carga fica entre o +24 V e a saída.</li>
+        </ul>
+        <div class="destaque alerta">Um sensor de 24 Vcc <strong>não aciona direto</strong> uma bobina de contator de 220 V. Usa-se um <strong>relé de interface</strong>
+        (bobina 24 Vcc, contato para 220 V) ou a entrada de um CLP. Ligar 220 V no sensor queima o sensor na hora.</div>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Que sensor usar para detectar uma garrafa PET passando numa esteira?</summary><p>Um sensor <strong>capacitivo</strong> ou <strong>fotoelétrico</strong>. O indutivo só detecta metal.</p></details>
+        <details><summary>2. Um sensor PNP detectou a peça. O que aparece no fio preto?</summary><p><strong>+24 V</strong> (em relação ao 0 V).</p></details>
+        <details><summary>3. Para que serve o diferencial de um pressostato?</summary><p>Para ele <strong>ligar e desligar em valores diferentes</strong> (ex.: 6 e 8 bar), evitando que o compressor fique ligando e desligando sem parar.</p></details>
+      `
+    },
+
+    "6-2": {
+      duracao: "13 min de leitura",
+      texto: `
+        <h2>Uma coisa depois da outra</h2>
+        <p>Em muitas instalações, um motor <strong>só pode ligar se outro já estiver ligado</strong>. O exemplo clássico são esteiras em sequência: a esteira 2 joga
+        material na esteira 1. Se a 2 ligar com a 1 parada, o material se acumula e entope tudo.</p>
+        ${seg}
+
+        <h2>Partida sequencial com permissão</h2>
+        ${fig("cmd-sequencial", "Comando sequencial: a bobina de K2 só é energizada se o contato auxiliar de K1 estiver fechado", "O contato K1 43-44 em série com a bobina K2 é a permissão.")}
+        <ul>
+          <li>Um contato <strong>auxiliar NA de K1</strong> (43-44) fica em série com a bobina de K2. Sem K1 ligado, S2 não faz nada.</li>
+          <li>Se K1 desligar por qualquer motivo, esse contato abre e <strong>K2 desliga junto</strong>.</li>
+          <li>Os contatos dos dois relés térmicos (F7 e F8) ficam em série no começo do comando: a sobrecarga de qualquer motor <strong>para os dois</strong>.</li>
+        </ul>
+        <div class="destaque">Regra das esteiras: <strong>liga</strong> primeiro a que está no fim do caminho do material (a que descarrega) e vai voltando.
+        Para <strong>desligar</strong>, faz o contrário: primeiro a que alimenta, depois as outras, para elas esvaziarem.</div>
+        <p>Com um <strong>temporizador</strong>, a sequência pode ser automática: S1 liga K1 e um KT; depois de alguns segundos, o contato do KT liga K2.
+        Isso também é usado para <strong>não ligar vários motores ao mesmo tempo</strong> e somar os picos de partida.</p>
+
+        <h2>Bomba com boia e seletor Manual – 0 – Automático</h2>
+        ${fig("cmd-boia", "Comando de bomba com seletor manual/automático, boia da caixa superior, boia da cisterna e relé falta de fase", "Seletor SA escolhe entre botões (manual) e boias (automático).")}
+        <ul>
+          <li><strong>Manual:</strong> funciona como uma partida direta comum, com S0, S1 e selo.</li>
+          <li><strong>Automático:</strong> a bomba liga sozinha quando a <strong>caixa superior baixa</strong> (boia B1 fechada) e só se <strong>há água na cisterna</strong> (boia B2 fechada).
+          Quando a caixa enche, B1 abre e a bomba para. Se a cisterna secar, B2 abre e protege a bomba de trabalhar a seco.</li>
+          <li><strong>0:</strong> nenhum dos dois ramos alimenta a bobina.</li>
+          <li>Relé térmico e relé de falta de fase (KFF) em série protegem nos dois modos.</li>
+        </ul>
+        <p>No modo automático não há selo: quem mantém a bomba ligada é a própria boia. Por isso a boia precisa de <strong>diferencial</strong> (liga em um nível, desliga em outro).</p>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. No comando sequencial, o operador aperta S2 com K1 desligado. O que acontece?</summary><p><strong>Nada</strong>: o contato K1 43-44 está aberto e a bobina de K2 não recebe energia.</p></details>
+        <details><summary>2. Três esteiras levam material da 3 para a 2 e da 2 para a 1 (que descarrega). Qual a ordem de partida?</summary><p><strong>1, depois 2, depois 3</strong> (do fim do caminho para o começo).</p></details>
+        <details><summary>3. No modo automático, por que a boia da cisterna fica em série com a da caixa superior?</summary><p>Para a bomba <strong>só ligar se houver água</strong> na cisterna, evitando trabalhar a seco.</p></details>
+      `
+    },
+
+    "6-3": {
+      duracao: "12 min de leitura",
+      texto: `
+        <h2>Proteções além do relé térmico</h2>
+        <p>O relé térmico mede corrente e protege contra <strong>sobrecarga</strong>. Mas um motor pode queimar por outros motivos que o térmico não percebe bem:
+        falta de uma fase, tensão muito baixa, fases invertidas, ventilação entupida, partidas demais. Para isso existem relés de proteção e monitoramento.</p>
+        ${seg}
+
+        <h2>Os principais</h2>
+        <table>
+          <tr><th>Relé</th><th>Protege contra</th><th>Onde é comum</th></tr>
+          <tr><td>Falta de fase</td><td>Motor trabalhando com duas fases (aquece e queima)</td><td>Bombas, compressores, quase todo motor importante</td></tr>
+          <tr><td>Sequência de fase</td><td>Fases invertidas (motor gira ao contrário)</td><td>Bombas, compressores de parafuso, elevadores, esteiras</td></tr>
+          <tr><td>Sub e sobretensão</td><td>Tensão fora da faixa</td><td>Redes rurais ou fracas</td></tr>
+          <tr><td>Assimetria</td><td>Tensões desequilibradas entre fases</td><td>Motores grandes</td></tr>
+          <tr><td>PTC (termistor)</td><td>Temperatura alta DENTRO do motor</td><td>Motores com sensores PTC no enrolamento</td></tr>
+          <tr><td>Nível (eletrodos)</td><td>Bomba trabalhando a seco</td><td>Poços, cisternas</td></tr>
+        </table>
+        <p>Muitos aparelhos juntam várias funções (falta, sequência, sub/sobretensão) num relé só, chamado de <strong>relé supervisor de rede</strong>.</p>
+
+        <h2>Como entram no comando</h2>
+        <p>Cada relé tem um <strong>contato de saída</strong> que fica <strong>fechado enquanto está tudo normal</strong>. Esse contato vai <strong>em série</strong> com a bobina
+        do contator, junto com o 95-96 do térmico. Se aparece o problema, o contato abre e o motor para. Muitos têm um LED indicando o defeito.</p>
+        <div class="destaque"><strong>Por que o PTC protege melhor em alguns casos?</strong> O térmico "estima" a temperatura pela corrente. Se o motor está com a
+        <strong>ventilação entupida</strong> ou num ambiente muito quente, ele pode esquentar demais com corrente normal, e o térmico não percebe.
+        O PTC fica dentro do enrolamento e mede a <strong>temperatura de verdade</strong>.</div>
+
+        <h2>Relés de tempo multifunção</h2>
+        <p>Além do retardo na energização (visto no módulo 1), relés modernos oferecem várias funções no mesmo aparelho: retardo na desenergização,
+        <strong>cíclico</strong> (liga e desliga em intervalos, ex.: agitador), pulso único e estrela-triângulo. A função é escolhida por chave ou ponte de fio.</p>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Um motor de bomba queimou porque um fusível de uma fase abriu e ele continuou girando. Que relé teria evitado?</summary><p>O relé de <strong>falta de fase</strong>.</p></details>
+        <details><summary>2. Onde fica o contato do relé de proteção no comando?</summary><p><strong>Em série com a bobina</strong> do contator, como o 95-96 do relé térmico.</p></details>
+        <details><summary>3. O motor esquenta muito porque a tampa da ventoinha está entupida, mas a corrente está normal. O que detecta isso?</summary><p>O <strong>PTC</strong> (termistor) no enrolamento, ligado a um relé PTC. O relé térmico não perceberia.</p></details>
+      `
+    },
+    "7-1": {
+      duracao: "13 min de leitura",
+      texto: `
+        <h2>Os fusíveis do painel</h2>
+        <p>Nos comandos elétricos, a proteção contra <strong>curto-circuito</strong> da força costuma ser feita por fusíveis ou por disjuntor-motor (visto no módulo 1).
+        Os dois tipos de fusível mais comuns em painéis brasileiros são o <strong>Diazed</strong> e o <strong>NH</strong>.</p>
+        ${seg}
+
+        <h2>Diazed (D)</h2>
+        <ul>
+          <li>Fusível de <strong>rosca</strong>, para correntes menores (de 2 A até cerca de 63 A, conforme o tamanho).</li>
+          <li>Conjunto: <strong>base</strong>, <strong>parafuso de ajuste</strong> (anel que impede colocar fusível maior que o previsto), <strong>fusível</strong> e <strong>tampa</strong>.</li>
+          <li>Tem um <strong>indicador de queima</strong> na ponta, com cor que identifica a corrente.</li>
+          <li>Troca simples, com a tampa (sempre com o circuito desligado).</li>
+        </ul>
+
+        <h2>NH</h2>
+        <ul>
+          <li>Fusível de <strong>faca</strong>, para correntes maiores (de poucos ampères até mais de 1.000 A, conforme o tamanho 00, 1, 2, 3…).</li>
+          <li>Alta <strong>capacidade de interrupção</strong> (dezenas de kA): aguenta abrir curtos muito fortes, comuns perto de transformadores.</li>
+          <li>Troca com o <strong>punho saca-fusível</strong> e EPI. Nunca sob carga: o arco pode causar queimaduras graves.</li>
+        </ul>
+
+        <h2>Classes: para que serve cada fusível</h2>
+        <table>
+          <tr><th>Classe</th><th>Protege</th><th>Comentário</th></tr>
+          <tr><td>gL / gG</td><td>Cabos e uso geral (sobrecarga e curto)</td><td>O mais comum. Retardado o suficiente para aguentar partidas curtas.</td></tr>
+          <tr><td>aM</td><td>Motores (só curto-circuito)</td><td>Aguenta bem a partida. A sobrecarga fica por conta do relé térmico.</td></tr>
+          <tr><td>aR / gR</td><td>Semicondutores (ultrarrápido)</td><td>Soft-starters, inversores, retificadores.</td></tr>
+        </table>
+
+        <h2>Como escolher para um motor</h2>
+        <ol>
+          <li>O fusível <strong>não pode queimar na partida</strong>: pela curva do fabricante, ele precisa aguentar a corrente de partida (Ip) durante o tempo de partida.</li>
+          <li>Ele precisa <strong>proteger o contator e o relé térmico</strong>: os catálogos desses componentes informam o <strong>fusível máximo</strong> permitido. Não passe dele.</li>
+          <li>E precisa proteger o <strong>cabo</strong> contra curto.</li>
+        </ol>
+        <div class="destaque">Por isso o fusível de motor quase sempre é <strong>bem maior</strong> que a corrente nominal (às vezes 2 a 3 vezes), e quem protege contra
+        sobrecarga é o relé térmico. Cada um faz a sua parte: esse trabalho em conjunto se chama <strong>coordenação</strong>.</div>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Para que serve o parafuso de ajuste do Diazed?</summary><p>Para <strong>impedir</strong> que se coloque um fusível de corrente maior que a prevista naquela base.</p></details>
+        <details><summary>2. Um motor de 8,6 A tem fusíveis de 25 A. Isso está errado?</summary><p><strong>Não necessariamente</strong>: o fusível de motor precisa aguentar a partida e é escolhido pela curva e pelo fusível máximo do relé. A sobrecarga é com o relé térmico.</p></details>
+        <details><summary>3. Que classe de fusível protege um soft-starter?</summary><p>Classe <strong>aR/gR (ultrarrápido)</strong>, para semicondutores.</p></details>
+      `
+    },
+
+    "7-2": {
+      duracao: "11 min de leitura",
+      texto: `
+        <h2>Por que um transformador só para o comando</h2>
+        <p>Em painéis industriais, o comando raramente é ligado direto em 380 V. Usa-se um <strong>transformador de comando</strong> que baixa para 220 V, 110 V ou 24 Vca.</p>
+        <ul>
+          <li><strong>Segurança:</strong> tensão menor nos botões, sinaleiros e fiação que o operador e o mantenedor tocam.</li>
+          <li><strong>Isolação:</strong> o comando fica separado da rede de força (enrolamentos separados).</li>
+          <li><strong>Aterramento controlado:</strong> um lado do secundário é ligado ao terra. Assim, um fio de comando encostando na carcaça causa uma
+          falta que <strong>queima o fusível</strong> do comando, em vez de ligar uma máquina sozinha.</li>
+        </ul>
+        ${seg}
+
+        <h2>Dimensionamento: dois números</h2>
+        <p>A bobina de um contator consome muito mais no instante em que <strong>fecha</strong> (potência de <strong>atração</strong>) do que depois de fechada
+        (potência de <strong>retenção</strong>). A atração pode ser 6 a 10 vezes maior. Por isso o transformador é verificado em dois casos:</p>
+        <ol>
+          <li><strong>Regime:</strong> soma das potências de retenção de todas as bobinas que ficam ligadas juntas + sinaleiros + relés. O transformador precisa
+          aguentar isso continuamente (potência nominal).</li>
+          <li><strong>Pico:</strong> a maior bobina <strong>fechando</strong> (atração) enquanto as outras estão retidas. Os catálogos de transformadores de comando
+          informam a <strong>potência instantânea</strong> (de pico) que eles aguentam sem a tensão cair demais.</li>
+        </ol>
+        <div class="destaque"><strong>Exemplo:</strong> três contatores (retenção 8 VA e atração 70 VA cada) e quatro sinaleiros de 1,5 W.<br>
+        Regime: 3 × 8 + 4 × 1,5 = <strong>30 VA</strong>.<br>
+        Pico (um contator fechando com os outros dois e os sinaleiros ligados): 70 + 2 × 8 + 6 = <strong>92 VA</strong>.<br>
+        Escolhe-se um transformador com potência nominal ≥ 30 VA <strong>e</strong> potência instantânea ≥ 92 VA (por exemplo, um de 50 VA, conferindo no catálogo).</div>
+
+        <h2>Proteção do transformador</h2>
+        <ul>
+          <li>Fusível (ou disjuntor) no <strong>primário</strong>, para curto no transformador.</li>
+          <li>Fusível no <strong>secundário</strong> (o F21 dos nossos diagramas), dimensionado para o comando.</li>
+          <li>Um lado do secundário <strong>aterrado</strong> e o fusível sempre no lado <strong>não aterrado</strong>.</li>
+        </ul>
+        <p>Comandos em <strong>24 Vcc</strong> (para sensores e CLP) usam uma <strong>fonte chaveada</strong> no lugar do transformador, com o mesmo raciocínio de potência.</p>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Por que verificar o pico de potência, e não só o regime?</summary><p>Porque a bobina puxa <strong>muito mais potência ao fechar</strong> (atração). Se o transformador não aguentar, a tensão cai e o contator pode não fechar ou "trepidar".</p></details>
+        <details><summary>2. Dois contatores (retenção 10 VA, atração 90 VA) e dois sinaleiros de 2 W. Qual o regime e o pico?</summary><p>Regime: 2 × 10 + 2 × 2 = <strong>24 VA</strong>. Pico: 90 + 10 + 4 = <strong>104 VA</strong>.</p></details>
+        <details><summary>3. Em qual lado do secundário fica o fusível de comando?</summary><p>No lado <strong>não aterrado</strong>.</p></details>
+      `
+    },
+
+    "7-3": {
+      duracao: "15 min de leitura",
+      texto: `
+        <h2>Juntando tudo: dimensionar uma partida</h2>
+        <p>Nesta aula fechamos o curso dimensionando os componentes de duas partidas. O roteiro é sempre o mesmo, e os valores finais vêm sempre dos
+        <strong>catálogos do fabricante</strong> escolhido.</p>
+        ${seg}
+
+        <h2>O roteiro</h2>
+        <ol>
+          <li><strong>Dados do motor</strong> (placa): potência, tensão, In, Ip/In, fator de serviço, tempo de partida da carga.</li>
+          <li><strong>Contatores:</strong> categoria AC-3, corrente ≥ à que passa por cada um.</li>
+          <li><strong>Relé térmico:</strong> faixa de ajuste que contenha a corrente que passa por ele.</li>
+          <li><strong>Fusíveis ou disjuntor-motor:</strong> aguentam a partida e não passam do máximo indicado para o relé/contator.</li>
+          <li><strong>Cabos:</strong> capacidade com folga (muitos projetistas usam 1,25 × In para circuito de um motor), agrupamento e queda de tensão, conforme a NBR 5410.</li>
+          <li><strong>Comando:</strong> transformador, fusível de comando, botões, sinaleiros e temporizadores.</li>
+        </ol>
+
+        <h2>Exemplo 1: partida direta</h2>
+        <p>Motor de 3 cv, 220 V, In = 8,6 A, Ip/In = 7,5 (o mesmo dos módulos anteriores).</p>
+        <table>
+          <tr><th>Componente</th><th>Conta</th><th>Escolha (exemplo)</th></tr>
+          <tr><td>Contator K1</td><td>AC-3 ≥ 8,6 A</td><td>9 A (ou 12 A para partidas frequentes)</td></tr>
+          <tr><td>Relé térmico F7</td><td>faixa contendo 8,6 A</td><td>faixa 7 a 10 A, ajustado em 8,6 A</td></tr>
+          <tr><td>Corrente de partida</td><td>7,5 × 8,6</td><td>≈ 65 A por poucos segundos</td></tr>
+          <tr><td>Fusíveis F1-F3</td><td>aguentar ≈ 65 A na partida e ≤ máximo do relé</td><td>pela curva do fabricante (algo na faixa de 20 a 25 A gL)</td></tr>
+          <tr><td>Cabo</td><td>1,25 × 8,6 ≈ 10,8 A</td><td>2,5 mm² (verificar agrupamento e queda de tensão)</td></tr>
+        </table>
+
+        <h2>Exemplo 2: estrela-triângulo</h2>
+        <p>Motor de 10 cv, 220/380 V, ligado em rede de 220 V, In = 26 A (o exemplo do módulo 3).</p>
+        <table>
+          <tr><th>Componente</th><th>Corrente</th><th>Escolha (exemplo)</th></tr>
+          <tr><td>K1 (rede) e K2 (triângulo)</td><td>0,58 × 26 ≈ 15,1 A</td><td>18 A em AC-3</td></tr>
+          <tr><td>K3 (estrela)</td><td>0,33 × 26 ≈ 8,6 A</td><td>9 A em AC-3</td></tr>
+          <tr><td>Relé térmico (depois de K1)</td><td>0,58 × 26 ≈ 15,1 A</td><td>faixa contendo 15,1 A</td></tr>
+          <tr><td>Cabos até o motor (6 fios)</td><td>passam ≈ 15,1 A cada</td><td>dimensionar pela corrente de fase, não pela de linha</td></tr>
+        </table>
+        <div class="destaque">Na estrela-triângulo os seis cabos até o motor levam a <strong>corrente de fase</strong> (0,58 × In), por isso podem ser mais finos do que
+        se fossem três cabos levando a corrente de linha. Mas o cabo que chega ao painel leva a corrente total (In).</div>
+
+        <h2>Teste rápido</h2>
+        <details><summary>1. Que categoria de emprego se usa para escolher o contator de um motor de gaiola?</summary><p><strong>AC-3</strong>.</p></details>
+        <details><summary>2. Na estrela-triângulo de um motor de 40 A, qual a corrente do contator de estrela (K3)?</summary><p>0,33 × 40 ≈ <strong>13,2 A</strong>.</p></details>
+
+        <h2>Desafio final</h2>
+        <p>Dimensione a partida direta de um motor de 7,5 cv, 380 V, com In = 11,3 A e Ip/In = 7: contator, faixa do relé térmico, corrente de partida e o critério dos fusíveis e do cabo.</p>
+        <details><summary>Ver resposta</summary><p>Contator <strong>AC-3 ≥ 11,3 A</strong> (12 A, ou 18 A com folga). Relé térmico com faixa contendo 11,3 A (ex.: 9 a 13 A), ajustado em 11,3 A.
+        Corrente de partida ≈ 7 × 11,3 ≈ <strong>79 A</strong>. Fusíveis escolhidos pela curva para aguentar ≈ 79 A durante o tempo de partida e sem passar do
+        fusível máximo do relé (consulte o catálogo). Cabo: 1,25 × 11,3 ≈ 14,1 A → <strong>2,5 mm²</strong> atende em 3 condutores carregados (método B1: 21 A), conferindo agrupamento e queda de tensão.</p></details>
+      `
     }
   };
 })();

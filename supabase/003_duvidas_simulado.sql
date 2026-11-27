@@ -161,3 +161,6 @@ begin
     execute format('grant execute on function public.%s to anon, authenticated', f);
   end loop;
 end $$;
+
+-- (2026-11-27) Comandos Elétricos ampliado: 22 aulas, 21 testes, 36 h
+update privado.cursos set aulas = 22, testes = 21, carga = '36h' where id = 'comandos-eletricos';

@@ -1043,6 +1043,166 @@ for k, (a, z) in enumerate((("100 a 120", "compressões por minuto"), ("5 a 6 cm
 tx += t(330, 30, "Ligue 192 (SAMU) antes de começar", BLUE, peso="800", tam=14, anc="start")
 arquivos["seg-rcp"] = svg(660, 365, (b, tx))
 
+# ===================== COMANDOS ELÉTRICOS — MÓDULOS 5 A 7 =====================
+# 9. partida compensadora (esquema unifilar de uma fase + sequência)
+b, tx = "", ""
+b += L((60, 40), (60, 70))
+bb, tt = fus(60, 70, 120, "F1"); b += bb; tx += tt
+b += L((60, 120), (60, 150), (330, 150))
+tx += dot(60, 150) + t(60, 28, "rede", RED, peso="800", tam=14)
+b += L((100, 150), (100, 185))
+bb, tt = ct(100, 185, 255, "na", nome="K1"); b += bb; tx += tt
+b += L((100, 255), (100, 410), (166, 410))
+tx += dot(100, 150)
+b += L((300, 150), (300, 180))
+b += '<rect x="286" y="180" width="28" height="120" fill="#fff"/>'
+for yy in range(188, 300, 14):
+    b += f'<path d="M 300 {yy} q 10 7 0 14" stroke-width="2"/>'
+tx += dot(300, 150)
+tx += t(278, 196, "100 %", MUTED, anc="end", tam=11) + t(278, 250, "65 %", ORANGE, anc="end", peso="800", tam=12) + t(278, 296, "0 %", MUTED, anc="end", tam=11)
+tx += t(318, 174, "autotransformador", anc="start", peso="700", tam=12)
+b += f'<polyline points="314,245 380,245 380,265" stroke="{ORANGE}" stroke-width="3"/>'
+bb, tt = ct(380, 265, 320, "na"); b += bb; tx += tt
+tx += t(400, 296, "K2", anc="start", peso="700", tam=14)
+b += L((380, 320), (380, 410), (234, 410))
+b += L((300, 300), (300, 312), (262, 312))
+bb, tt = ct(262, 312, 365, "na"); b += bb; tx += tt
+tx += t(236, 345, "K3", anc="end", peso="700", tam=14)
+b += L((262, 365), (262, 378)) + '<line x1="246" y1="378" x2="278" y2="378"/>'
+tx += t(292, 382, "fecha a estrela", MUTED, anc="start", tam=11)
+bb, tt = motor(200, 410, 34); b += bb; tx += tt
+lin = [("Etapa", "K1", "K2", "K3", "tensão no motor"), ("1 · partida", "—", "liga", "liga", "65 % (derivação)"), ("2 · transição", "—", "liga", "abre", "autotrafo vira reator"), ("3 · regime", "liga", "abre", "—", "100 % (rede)")]
+for i, row in enumerate(lin):
+    y = 70 + i * 34
+    if i == 0:
+        b += f'<rect x="470" y="{y-22}" width="400" height="30" rx="5" fill="#eef2f7" stroke="none"/>'
+    for j, (xx, cel) in enumerate(zip((480, 590, 640, 690, 740), row)):
+        cor = INK if i == 0 or cel == "—" else (GREEN if cel == "liga" else RED if cel == "abre" else INK)
+        tx += t(xx, y, cel, cor, anc="start", peso="800" if i == 0 or j == 0 else "600", tam=12)
+tx += t(670, 230, "A corrente puxada da rede cai para", peso="700", tam=13) + t(670, 248, "≈ 0,65² ≈ 42 % da partida direta", ORANGE, peso="800", tam=13)
+tx += t(670, 278, "Derivações usuais: 50 %, 65 % e 80 %", MUTED, tam=12)
+tx += t(670, 296, "K1 nunca liga junto com K2/K3 (intertravamento)", MUTED, tam=12)
+tx += t(440, 468, "Esquema simplificado de UMA fase (o real repete para as três).", MUTED, tam=12)
+arquivos["cmd-compensadora"] = svg(890, 485, (b, tx))
+
+# 10. Dahlander: baixa (Δ) e alta (YY)
+b, tx = "", ""
+V = [(170, 60), (70, 235), (270, 235)]           # vértices 1, 2, 3
+M = [((V[0][0]+V[1][0])/2, (V[0][1]+V[1][1])/2), ((V[1][0]+V[2][0])/2, (V[1][1]+V[2][1])/2), ((V[2][0]+V[0][0])/2, (V[2][1]+V[0][1])/2)]
+for (a, c) in ((0, 1), (1, 2), (2, 0)):
+    xa, ya = V[a]; xc, yc = V[c]
+    xm_, ym_ = (xa + xc) / 2, (ya + yc) / 2
+    for (p1, p2) in (((xa, ya), (xm_, ym_)), ((xm_, ym_), (xc, yc))):
+        bb, tt = bobina_rot(p1[0], p1[1], p2[0], p2[1], (0, 0, "")); b += bb
+for (vx, vy), n in zip(V, ("1", "2", "3")):
+    tx += dot(vx, vy)
+for (mx_, my_), n in zip(M, ("4", "5", "6")):
+    tx += f'<circle cx="{mx_:.1f}" cy="{my_:.1f}" r="5" fill="#fff" stroke="{INK}" stroke-width="2"/>'
+tx += t(170, 44, "1 ← L1", RED, peso="800", tam=13) + t(48, 262, "L2 → 2", RED, peso="800", tam=13) + t(292, 262, "3 ← L3", RED, peso="800", tam=13)
+tx += t(M[0][0] - 14, M[0][1], "4", MUTED, anc="end", peso="700", tam=13) + t(M[1][0], M[1][1] + 26, "5", MUTED, peso="700", tam=13) + t(M[2][0] + 14, M[2][1], "6", MUTED, anc="start", peso="700", tam=13)
+tx += t(170, 305, "BAIXA velocidade — triângulo (Δ)", peso="800", tam=14) + t(170, 324, "L1-1, L2-2, L3-3 · 4, 5 e 6 livres", MUTED, tam=12)
+tx += t(170, 342, "mais polos → menor rotação", MUTED, tam=12)
+# alta YY
+cx, cy = 520, 160
+P = [(520, 50), (420, 230), (620, 230)]
+for (px, py) in P:
+    ang = math.atan2(py - cy, px - cx); ux, uy = math.cos(ang), math.sin(ang)
+    a1 = (cx + ux * 28, cy + uy * 28); a2 = (px - ux * 12, py - uy * 12)
+    b += L((cx, cy), a1) + L(a2, (px, py))
+    for d in (-12, 12):
+        ox, oy = -uy * d, ux * d
+        b += L(a1, (a1[0] + ox, a1[1] + oy)) + L(a2, (a2[0] + ox, a2[1] + oy))
+        bb, tt = bobina_rot(a1[0] + ox, a1[1] + oy, a2[0] + ox, a2[1] + oy, (0, 0, "")); b += bb
+    tx += dot(px, py)
+tx += dot(cx, cy) + t(cx + 30, cy - 18, "centro: 1-2-3 unidos", ORANGE, anc="start", peso="800", tam=12)
+tx += t(520, 36, "4 ← L1", RED, peso="800", tam=13) + t(398, 258, "L2 → 5", RED, peso="800", tam=13) + t(642, 258, "6 ← L3", RED, peso="800", tam=13)
+tx += t(520, 305, "ALTA velocidade — dupla estrela (YY)", peso="800", tam=14) + t(520, 324, "L1-4, L2-5, L3-6 · 1-2-3 em curto", MUTED, tam=12)
+tx += t(520, 342, "metade dos polos → o dobro da rotação", MUTED, tam=12)
+b += '<line x1="345" y1="30" x2="345" y2="340" stroke="#e2e5ea" stroke-width="2"/>'
+tx += t(345, 372, "Exemplo: motor 4/2 polos em 60 Hz → 1.800 / 3.600 rpm síncronas (≈ 1.740 / 3.500 rpm na placa).", peso="700", tam=13)
+arquivos["cmd-dahlander"] = svg(690, 390, (b, tx))
+
+# 11. frenagem por injeção de CC (bloco) + gráfico de rotação
+b, tx = "", ""
+xs = (70, 110, 150)
+for x, n in zip(xs, ("L1", "L2", "L3")):
+    tx += t(x, 28, n, RED, peso="800", tam=13)
+    b += L((x, 36), (x, 70))
+bb, tt = contatos3(xs, 70, 140, "K1"); b += bb; tx += tt
+b += "".join(L((x, 140), (x, 230)) for x in xs)
+bb, tt = motor(110, 265, 34); b += bb; tx += tt
+# fonte CC
+b += f'<rect x="210" y="70" width="110" height="70" rx="8" fill="#fff"/>'
+tx += t(265, 98, "trafo +", peso="700", tam=12) + t(265, 116, "retificador", peso="700", tam=12) + t(265, 132, "(CC)", BLUE, peso="800", tam=12)
+b += L((230, 140), (230, 160))
+bb, tt = ct(230, 160, 215, "na"); b += bb
+b += L((300, 140), (300, 160))
+bb, tt = ct(300, 160, 215, "na"); b += bb
+tx += t(335, 192, "K2", anc="start", peso="700", tam=14)
+b += f'<polyline points="230,215 230,200 230,205" />' + f'<polyline points="230,215 230,215 70,215" stroke="{BLUE}" stroke-width="3"/>' + f'<polyline points="300,215 300,198" />'
+b += f'<polyline points="300,215 300,222 110,222" stroke="{BLUE}" stroke-width="3"/>'
+tx += dot(70, 215) + dot(110, 222)
+tx += t(160, 254, "CC em duas fases", BLUE, anc="start", peso="700", tam=12)
+tx += t(190, 330, "K1 desliga → K2 injeta CC por poucos segundos", peso="700", tam=12)
+tx += t(190, 346, "(K1 e K2 intertravados; temporizador limita o tempo)", MUTED, tam=11)
+# gráfico rotação x tempo
+gx, gy, gw, gh = 420, 60, 300, 220
+b += L((gx, gy), (gx, gy + gh), (gx + gw, gy + gh))
+tx += t(gx - 8, gy + 6, "rpm", MUTED, anc="end", tam=12) + t(gx + gw, gy + gh + 20, "tempo", MUTED, anc="end", tam=12)
+b += f'<path d="M {gx} {gy+20} C {gx+90} {gy+30}, {gx+200} {gy+150}, {gx+290} {gy+gh-2}" stroke="{MUTED}" stroke-width="3" stroke-dasharray="7 5"/>'
+b += f'<path d="M {gx} {gy+20} C {gx+30} {gy+40}, {gx+60} {gy+150}, {gx+95} {gy+gh-2}" stroke="{RED}" stroke-width="3.5"/>'
+tx += t(gx + 210, gy + 120, "parada livre", MUTED, anc="start", peso="700", tam=12) + t(gx + 210, gy + 136, "(só o atrito freia)", MUTED, anc="start", tam=11)
+tx += t(gx + 100, gy + gh - 30, "com frenagem CC", RED, anc="start", peso="700", tam=12)
+tx += t(gx + gw / 2, gy + gh + 50, "A CC cria um campo parado que segura o rotor.", peso="700", tam=12)
+arquivos["cmd-frenagem"] = svg(740, 360, (b, tx))
+
+# 12. partida sequencial (comando): M2 só liga depois de M1
+b, tx = trilhos(40, 560, 40, 500)
+p = [fus(110, 40, 100, "F21"),
+     ct(110, 100, 160, "nf", acion="termico", nome="F7", nums=("95", "96")),
+     ct(110, 160, 220, "nf", acion="termico", nome="F8", nums=("95", "96")),
+     ct(110, 220, 285, "nf", acion="botao", nome="S0"),
+     ct(110, 285, 365, "na", acion="botao", nome="S1"), ct(200, 285, 365, "na", nome="K1", nums=("13", "14")),
+     bob(110, 365, 500, "K1"),
+     ct(390, 285, 365, "na", acion="botao", nome="S2"), ct(480, 285, 365, "na", nome="K2", nums=("13", "14")),
+     ct(390, 365, 425, "na", nome="K1", nums=("43", "44")), bob(390, 425, 500, "K2")]
+bb, tt = soma(*p); b += bb; tx += tt
+b += L((110, 285), (480, 285)) + L((110, 365), (200, 365)) + L((390, 365), (480, 365))
+tx += dot(110, 285) + dot(200, 285) + dot(390, 285) + dot(110, 365) + dot(390, 365)
+tx += f'<rect x="326" y="368" width="124" height="66" rx="8" fill="none" stroke="{ORANGE}" stroke-width="2" stroke-dasharray="6 5"/>'
+tx += t(460, 392, "permissão:", ORANGE, anc="start", peso="800", tam=12) + t(460, 408, "só com K1 ligado", ORANGE, anc="start", tam=12)
+tx += t(110, 528, "K1 — esteira 1 (descarga)", peso="700", tam=13) + t(390, 528, "K2 — esteira 2 (alimenta a 1)", peso="700", tam=13)
+tx += t(300, 556, "Se K1 desligar (ou F7 desarmar), K2 cai junto: nada se acumula na esteira 1.", peso="700", tam=13)
+arquivos["cmd-sequencial"] = svg(600, 570, (b, tx))
+
+# 13. bomba com boia e seletor manual/automático
+b, tx = trilhos(40, 600, 40, 500)
+p = [fus(110, 40, 100, "F21"),
+     ct(110, 100, 160, "nf", acion="termico", nome="F7", nums=("95", "96")),
+     ct(110, 160, 225, "nf", nome="KFF", nums=("11", "12"))]
+bb, tt = soma(*p); b += bb; tx += tt
+b += L((110, 225), (110, 245), (450, 245))
+tx += dot(110, 245)
+# ramo MANUAL
+p = [ct(180, 245, 305, "na", nome="SA-M"), ct(180, 305, 365, "nf", acion="botao", nome="S0"),
+     ct(180, 365, 430, "na", acion="botao", nome="S1"), ct(270, 365, 430, "na", nome="K1", nums=("13", "14"))]
+bb, tt = soma(*p); b += bb; tx += tt
+b += L((180, 365), (270, 365)) + L((180, 430), (270, 430)) + L((180, 430), (180, 440), (330, 440))
+tx += dot(180, 365) + dot(180, 430)
+# ramo AUTOMÁTICO
+p = [ct(450, 245, 305, "na", nome="SA-A"), ct(450, 305, 370, "nf", nome="B1"), ct(450, 370, 430, "na", nome="B2")]
+bb, tt = soma(*p); b += bb; tx += tt
+b += L((450, 430), (450, 440), (330, 440))
+tx += dot(330, 440)
+bb, tt = bob(330, 440, 500); b += bb; tx += tt
+tx += t(300, 476, "K1", anc="end", peso="700", tam=14)
+tx += t(480, 342, "boia da caixa superior", anc="start", tam=11) + t(480, 356, "abre quando ENCHE", ORANGE, anc="start", peso="700", tam=11)
+tx += t(480, 404, "boia da cisterna", anc="start", tam=11) + t(480, 418, "fecha se HÁ ÁGUA", ORANGE, anc="start", peso="700", tam=11)
+tx += t(210, 278, "manual", MUTED, anc="start", tam=11) + t(480, 278, "automático", MUTED, anc="start", tam=11)
+tx += t(150, 200, "relé falta de fase", MUTED, anc="start", tam=11)
+tx += t(320, 528, "Seletor SA: Manual (botões) · 0 (desligado) · Automático (boias). KFF desliga se faltar fase.", peso="700", tam=12)
+arquivos["cmd-boia"] = svg(640, 545, (b, tx))
+
 for nome, conteudo in arquivos.items():
     open(os.path.join(OUT, nome + ".svg"), "w", encoding="utf-8").write(conteudo)
 print(len(arquivos), "arquivos")
