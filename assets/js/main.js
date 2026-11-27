@@ -258,6 +258,10 @@
   })();
   window.RotaAluno = Aluno;
 
+  // ---------------------------------------------------------------- páginas que exigem login
+  function paginaProtegida() { return ["cursos", "perfil", "busca"].includes(document.body.dataset.pagina); }
+  function urlLogin() { return "entrar.html?volta=" + encodeURIComponent(location.pathname.split("/").pop() + location.search); }
+
   // ---------------------------------------------------------------- conta do aluno (telefone + senha, Supabase)
   // Login é opcional: sem conta, o progresso fica só no navegador. Com conta, vai para a nuvem,
   // entra no ranking e o certificado fica verificável. A sessão é um token guardado no navegador.
@@ -310,9 +314,12 @@
     function salvarEstado() { gravar(CH, estado); }
     const ouvintes = [];
     const ouvir = () => ouvintes.forEach((f) => { try { f(estado); } catch (e) { /* ignora */ } });
-    function encerrarLocal(aviso) {
+    function encerrarLocal(aviso, destino) {
       estado = {}; salvarEstado(); ouvir();
       if (aviso) toast("🔒", aviso);
+      // nas páginas que exigem login, sem sessão volta para o login (ou para o destino pedido)
+      if (destino) setTimeout(() => location.replace(destino), aviso ? 1200 : 0);
+      else if (paginaProtegida()) setTimeout(() => location.replace(urlLogin()), aviso ? 1500 : 0);
     }
 
     let timer = null, enviando = null;
@@ -370,7 +377,7 @@
         await Online.aguardar();
         if (t) await rpc("rota_sair", { p_token: t }).catch(() => {});
         Aluno.zerar(); // o progresso fica salvo na conta; este aparelho volta a ficar limpo
-        encerrarLocal();
+        encerrarLocal(null, paginaProtegida() ? "index.html" : null);
       },
       async atualizarPerfil() {
         if (!estado.token) return null;
@@ -390,11 +397,13 @@
       async apagar(senha) {
         await rpc("rota_apagar_conta", { p_token: estado.token, p_senha: senha });
         Aluno.definir("certificados", {});
-        encerrarLocal();
+        encerrarLocal(null, "index.html");
       }
     };
   })();
   window.RotaOnline = Online;
+  // login obrigatório para os cursos (o <head> das páginas já redireciona; isto é a segunda barreira)
+  if (paginaProtegida() && !Online.ativo) { location.replace(urlLogin()); return; }
   if (Online.ativo) {
     // a cada visita (no máximo a cada 10 min): confere a sessão e atualiza o ranking
     if (!Online.estado.ultimoEnvio || Date.now() - Online.estado.ultimoEnvio > 600000) {
@@ -814,6 +823,11 @@
   }
 
   // ---------------------------------------------------------------- página inicial
+  const heroA = document.getElementById("hero-a"), heroB = document.getElementById("hero-b");
+  if (heroA && heroB && Online.ativo) {
+    heroA.textContent = "Começar a trilha →"; heroA.href = "curso.html?id=matematica-eletricistas";
+    heroB.textContent = "Ver catálogo"; heroB.href = "cursos.html";
+  }
   const elNumeros = document.getElementById("numeros");
   if (elNumeros) {
     const aulas = cursos.reduce((n, c) => n + totalAulas(c), 0);
@@ -1426,8 +1440,8 @@
   const paginaEntrar = document.getElementById("pagina-entrar");
   if (paginaEntrar) {
     const params = new URLSearchParams(location.search);
-    const voltaBruta = params.get("volta") || "perfil.html";
-    const volta = /^[a-z0-9-]+\.html(\?[^#]*)?$/i.test(voltaBruta) && !/^entrar\.html/i.test(voltaBruta) ? voltaBruta : "perfil.html";
+    const voltaBruta = params.get("volta") || "cursos.html";
+    const volta = /^[a-z0-9-]+\.html(\?[^#]*)?$/i.test(voltaBruta) && !/^entrar\.html/i.test(voltaBruta) ? voltaBruta : "cursos.html";
     let modo = params.get("criar") ? "criar" : "entrar";
     const mascarar = (v) => {
       const d = v.replace(/\D/g, "").slice(0, 11);
@@ -1448,6 +1462,7 @@
       const criar = modo === "criar";
       paginaEntrar.innerHTML = `<div class="entrar-caixa"><div class="entrar-cartao">
         <img src="assets/icones/icone-192.png" alt="" width="56" height="56" style="border-radius:14px">
+        <p class="entrar-aviso">${params.get("volta") ? "🔒 Entre na sua conta para acessar os cursos." : "Os cursos são gratuitos: é só criar sua conta."}</p>
         <div class="abas-entrar" role="tablist">
           <button role="tab" aria-selected="${!criar}" class="${criar ? "" : "ativo"}" data-modo="entrar">Entrar</button>
           <button role="tab" aria-selected="${criar}" class="${criar ? "ativo" : ""}" data-modo="criar">Criar conta</button>
@@ -1463,7 +1478,7 @@
         </form>
         ${criar ? `<p class="nota-mini">${Aluno.resumo().aulas ? `O progresso deste aparelho (${Aluno.resumo().aulas} aulas, ${fmt(Aluno.dados.xp)} XP) vai para a conta nova.` : "Seu telefone não aparece para outros alunos: no ranking só aparece o apelido."}</p>`
           : `<p class="nota-mini">Esqueceu a senha? Fale com a Rota Industrial para receber uma senha nova.</p>`}
-        <p style="text-align:center;margin:14px 0 0"><a href="${esc(volta)}">Continuar sem conta</a></p>
+        <p style="text-align:center;margin:14px 0 0"><a href="index.html">← Voltar ao início</a></p>
       </div></div>`;
       paginaEntrar.querySelectorAll("[data-modo]").forEach((b) => b.addEventListener("click", () => { modo = b.dataset.modo; desenhar(); }));
       const tel = paginaEntrar.querySelector("#f-tel");

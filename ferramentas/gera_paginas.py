@@ -5,18 +5,27 @@ Ao mudar CSS ou JS, aumente VERSAO para o navegador baixar a versão nova.
 """
 import os
 
-VERSAO = "10"  # manter igual ao usado em sw.js
+VERSAO = "11"  # manter igual ao usado em sw.js
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC = "Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, ranking e certificado."
 
 
+# páginas que exigem login (catálogo, curso, aulas, simulado, busca, progresso, anotações, certificado)
+PROTEGIDAS = {"cursos", "perfil", "busca"}
+# roda no <head>, antes de desenhar a página: sem sessão salva, vai direto para o login (sem "piscar" o conteúdo)
+GUARDA = """  <script>(function(){try{var c=JSON.parse(localStorage.getItem("rota-conta")||"{}");if(c&&c.token)return;}catch(e){}
+    var v=location.pathname.split("/").pop()+location.search;location.replace("entrar.html?volta="+encodeURIComponent(v));})();</script>
+"""
+
+
 def pagina(arq, titulo, id_pag, main_attr="", corpo="", desc=DESC, js=()):
+    guarda = GUARDA if id_pag in PROTEGIDAS else ""
     extra = "".join(f'\n  <script src="assets/js/{n}.js?v={VERSAO}"></script>' for n in js)
     html = f'''<!doctype html>
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+{guarda}  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>{titulo}</title>
   <meta name="description" content="{desc}">
   <meta name="theme-color" content="#0f1d30">
@@ -94,8 +103,8 @@ pagina("index.html", "Rota Industrial | Cursos de elétrica com testes, ranking 
           <h1>Sua rota para a <em>elétrica profissional</em></h1>
           <p>Cursos práticos para quem trabalha — ou quer trabalhar — com instalações industriais, residenciais e comerciais. Estude, responda os testes, ganhe XP e suba no ranking.</p>
           <div class="acoes">
-            <a class="botao botao-primario" href="curso.html?id=matematica-eletricistas">Começar a trilha →</a>
-            <a class="botao botao-secundario" href="cursos.html">Ver catálogo</a>
+            <a class="botao botao-primario" id="hero-a" href="entrar.html?criar=1&amp;volta=cursos.html">Criar conta grátis →</a>
+            <a class="botao botao-secundario" id="hero-b" href="entrar.html?volta=cursos.html">Já tenho conta</a>
           </div>
           <div class="numeros" id="numeros"></div>
         </div>
@@ -117,7 +126,7 @@ pagina("index.html", "Rota Industrial | Cursos de elétrica com testes, ranking 
     <section class="faixa">
       <div class="container">
         <div class="eyebrow">Como funciona</div><h2 class="secao-titulo">Estude, pratique, evolua</h2>
-        <p class="secao-sub">Tudo gratuito e direto no navegador, sem cadastro.</p>
+        <p class="secao-sub">Tudo gratuito, direto no navegador. Basta criar sua conta com telefone e senha.</p>
         <div class="grade-3" style="margin-top:28px">
           <div class="cartao etapa"><span class="num">1</span><div class="icone">📘</div><h3>Aulas com diagramas</h3><p>Texto direto ao ponto, exemplos de campo e mais de 50 diagramas desenhados para o curso.</p></div>
           <div class="cartao etapa"><span class="num">2</span><div class="icone">📝</div><h3>Testes com nota</h3><p>Cada aula termina com um teste de múltipla escolha. Acerte, ganhe XP e mantenha a sequência 🔥.</p></div>
@@ -192,9 +201,9 @@ pagina("sobre.html", "Sobre | Rota Industrial", "sobre", corpo='''
       <h2>Por onde começamos</h2>
       <p>A primeira trilha é a de <strong>Elétrica</strong>, com 8 cursos: matemática, fundamentos, segurança, análise de circuitos, instalações residenciais e comerciais, comandos elétricos e motores.</p>
       <h2>Como o aprendizado é medido</h2>
-      <p>Cada aula tem um teste de múltipla escolha. Acertos valem XP, acertos seguidos formam uma sequência e o XP leva você de <em>Aprendiz</em> a <em>Mestre da Rota</em>. O progresso fica salvo no seu navegador; se quiser, entre no <a href="ranking.html">ranking online</a> com um apelido (sem e-mail) para comparar com outros alunos e levar o progresso para outro aparelho.</p>
+      <p>Cada aula tem um teste de múltipla escolha. Acertos valem XP, acertos seguidos formam uma sequência e o XP leva você de <em>Aprendiz</em> a <em>Mestre da Rota</em>. Para estudar, crie uma conta grátis com telefone e senha: o progresso fica salvo na conta e acompanha você em qualquer aparelho.</p>
       <h2>Privacidade</h2>
-      <p>Não pedimos e-mail nem senha. No ranking aparecem só o apelido, o nível e os pontos. O nome digitado no certificado só fica visível para quem tem o código dele. A conta online pode ser apagada a qualquer momento em <a href="perfil.html">Meu progresso</a>.</p>
+      <p>Pedimos só nome, telefone e uma senha (não pedimos e-mail). O telefone não aparece para outros alunos: no ranking aparecem só o apelido, o nível e os pontos. O nome digitado no certificado só fica visível para quem tem o código dele. A conta online pode ser apagada a qualquer momento em <a href="perfil.html">Meu progresso</a>.</p>
       <h2>Importante</h2>
       <p>Os cursos são <strong>livres e introdutórios</strong>. Eles não substituem a formação técnica nem os treinamentos obrigatórios por norma, como a NR-10. Trabalho em eletricidade exige profissional qualificado, habilitado e autorizado.</p>
       <h2>Próximas áreas</h2>

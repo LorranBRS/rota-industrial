@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const raiz = document.getElementById("pagina-simulado");
-  if (!raiz) return;
+  if (!raiz || !window.RotaUtil) return; // sem login, main.js já redirecionou
   const U = window.RotaUtil, Aluno = window.RotaAluno, Ef = window.RotaEfeitos;
   const { esc, toast, linkAula, linkCurso, acharCurso, aulasDoCurso, quizDe, estadoCurso, XP } = U;
   const c = acharCurso(new URLSearchParams(location.search).get("curso"));
