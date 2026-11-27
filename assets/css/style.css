@@ -492,3 +492,125 @@ mark { background: #ffe38a; color: #16202c; border-radius: 3px; padding: 0 2px; 
   .menu.aberto { display: flex; }
   .menu a { padding: 12px 14px; }
 }
+
+/* =====================================================================
+   ANIMAÇÕES
+   ===================================================================== */
+main { animation: aparece .35s ease-out; }
+@keyframes aparece { from { opacity: 0; } to { opacity: 1; } }
+
+/* hero: entrada em cascata */
+.hero .container > div:first-child > * { animation: sobe .7s cubic-bezier(.2,.7,.2,1) both; }
+.hero .container > div:first-child > :nth-child(2) { animation-delay: .08s; }
+.hero .container > div:first-child > :nth-child(3) { animation-delay: .16s; }
+.hero .container > div:first-child > :nth-child(4) { animation-delay: .24s; }
+.hero .container > div:first-child > :nth-child(5) { animation-delay: .32s; }
+.hero-arte { animation: surge .9s .2s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes sobe { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes surge { from { opacity: 0; transform: translateY(16px) scale(.96); } to { opacity: 1; transform: none; } }
+.hero h1 em { background: linear-gradient(90deg, var(--brand) 0%, #fff1b8 45%, var(--brand) 60%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: brilho-texto 5s ease-in-out 1s infinite; }
+@keyframes brilho-texto { 0%, 60% { background-position: 100% 0; } 100% { background-position: -150% 0; } }
+.hero-tag { position: relative; }
+.hero-tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 0 rgba(245,179,0,.7); animation: radar 1.8s infinite; }
+@keyframes radar { 70% { box-shadow: 0 0 0 9px rgba(245,179,0,0); } 100% { box-shadow: 0 0 0 0 rgba(245,179,0,0); } }
+
+/* hero: diagrama "liga" — chave fecha, corrente flui, contator acende, motor gira */
+.arte-animada .lamina { transform-box: view-box; transform-origin: 190px 110px; animation: lamina 7s ease-in-out infinite; }
+@keyframes lamina { 0%, 8% { transform: rotate(0); } 13%, 86% { transform: rotate(-32.5deg); } 92%, 100% { transform: rotate(0); } }
+.arte-animada .corrente { opacity: 0; animation: corrente-liga 7s infinite, corrente-anda .55s linear infinite; }
+@keyframes corrente-liga { 0%, 13% { opacity: 0; } 16%, 84% { opacity: 1; } 88%, 100% { opacity: 0; } }
+@keyframes corrente-anda { to { stroke-dashoffset: -36; } }
+.arte-animada .faisca { opacity: 0; transform-box: fill-box; transform-origin: center; animation: faisca 7s infinite; }
+@keyframes faisca { 0%, 12% { opacity: 0; transform: scale(.3); } 13.5% { opacity: 1; transform: scale(1.5); } 19%, 100% { opacity: 0; transform: scale(1); } }
+.arte-animada .k1 { animation: k1 7s infinite; }
+@keyframes k1 { 0%, 15% { stroke: #9fc1e8; fill: rgba(245,179,0,0); } 19%, 84% { stroke: #f5b300; fill: rgba(245,179,0,.22); } 88%, 100% { stroke: #9fc1e8; fill: rgba(245,179,0,0); } }
+.arte-animada .rotor { transform-box: view-box; transform-origin: 190px 285px; animation: gira .9s linear infinite, rotor-liga 7s infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+@keyframes rotor-liga { 0%, 17% { opacity: .12; } 23%, 84% { opacity: 1; } 90%, 100% { opacity: .12; } }
+.arte-animada .flutua { animation: flutua 4.5s ease-in-out infinite; }
+.arte-animada .f2 { animation-delay: -1.5s; }
+.arte-animada .f3 { animation-delay: -3s; }
+@keyframes flutua { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+.arte-animada .fogo { transform-box: fill-box; transform-origin: 50% 90%; animation: chama 1.1s ease-in-out infinite alternate; }
+@keyframes chama { from { transform: scale(1) rotate(-4deg); } to { transform: scale(1.12) rotate(5deg); } }
+
+/* entrada suave ao rolar */
+.revelar { opacity: 0; transform: translateY(20px); transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .6s cubic-bezier(.2,.7,.2,1), box-shadow .15s, border-color .15s; }
+.revelar.visivel { opacity: 1; transform: none; }
+a.cartao.revelar.visivel:hover { transform: translateY(-3px); }
+.passo.revelar.visivel:hover { transform: translateX(3px); }
+
+/* barras de progresso enchendo */
+.progresso-barra, .mini-progresso div { animation: enche 1.1s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes enche { from { width: 0; } }
+.progresso-barra { position: relative; overflow: hidden; }
+.progresso-barra::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); transform: translateX(-100%); animation: varre 2.6s 1.2s ease-in-out infinite; }
+@keyframes varre { 60%, 100% { transform: translateX(100%); } }
+
+/* botões */
+.botao { position: relative; overflow: hidden; transition: background .15s, transform .15s, box-shadow .15s, border-color .15s; }
+.botao-primario:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(245,179,0,.35); }
+.botao-primario::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: skewX(-20deg); transition: left .6s; }
+.botao-primario:hover::after { left: 130%; }
+
+/* cartões de curso: ícone da capa reage ao passar o mouse */
+.cartao-curso .capa .ico { transition: transform .35s cubic-bezier(.3,1.6,.5,1); }
+.cartao-curso:hover .capa .ico { transform: scale(1.15) rotate(-6deg); }
+.passo .marco { transition: transform .3s cubic-bezier(.3,1.6,.5,1); }
+.passo:hover .marco { transform: scale(1.12); }
+
+/* quiz */
+.opcao { transition: border-color .12s, background .12s, transform .12s; }
+.opcao:hover:not([disabled]) { transform: translateX(4px); }
+.opcao.certa { animation: acerto .6s ease-out; }
+@keyframes acerto { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(31,138,76,.55); } 35% { transform: scale(1.03); } 100% { transform: scale(1); box-shadow: 0 0 0 14px rgba(31,138,76,0); } }
+.opcao.certa .letra { animation: estoura .5s cubic-bezier(.3,1.8,.5,1); }
+.treme { animation: treme .45s ease-in-out; }
+@keyframes treme { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-7px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(3px); } }
+.explicacao { animation: desliza .35s ease-out; }
+@keyframes desliza { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.quiz-resultado:not(.oculto) { animation: desliza .4s ease-out; }
+.estoura { animation: estoura .55s cubic-bezier(.3,1.8,.5,1); }
+@keyframes estoura { 0% { transform: scale(.6); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
+.pulsa { animation: pulsa .5s cubic-bezier(.3,1.8,.5,1); }
+@keyframes pulsa { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+.quiz-topo .pill.fogo { display: inline-block; }
+
+/* XP voando e confete */
+.xp-voa { position: fixed; z-index: 300; pointer-events: none; font-weight: 900; font-size: 1.05rem; color: #0f1d30; background: var(--brand); padding: 3px 10px; border-radius: 999px; box-shadow: 0 6px 18px rgba(245,179,0,.45); white-space: nowrap; }
+.confete { position: fixed; z-index: 300; pointer-events: none; display: block; }
+
+/* toasts */
+.toast .ic { display: inline-block; }
+.toast-medalha { border-left-color: #ffd34d; background: linear-gradient(135deg, #17304f, #0f1d30); }
+.toast-medalha .ic { animation: medalha .9s cubic-bezier(.3,1.8,.5,1); font-size: 1.9rem; }
+@keyframes medalha { 0% { transform: scale(0) rotate(-180deg); } 70% { transform: scale(1.3) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
+
+/* celebração de nível */
+.celebra { position: fixed; inset: 0; z-index: 250; display: grid; place-items: center; background: rgba(5,10,18,0); transition: background .35s; cursor: pointer; padding: 16px; }
+.celebra.aberta { background: rgba(5,10,18,.72); }
+.celebra-cartao { position: relative; text-align: center; color: #fff; transform: scale(.5); opacity: 0; transition: transform .5s cubic-bezier(.3,1.6,.5,1), opacity .3s; }
+.celebra.aberta .celebra-cartao { transform: scale(1); opacity: 1; }
+.celebra-cartao .raios { position: absolute; left: 50%; top: 70px; width: 420px; height: 420px; margin: -210px 0 0 -210px; background: repeating-conic-gradient(rgba(245,179,0,.28) 0 10deg, transparent 10deg 20deg); border-radius: 50%; -webkit-mask: radial-gradient(circle, #000 25%, transparent 70%); mask: radial-gradient(circle, #000 25%, transparent 70%); animation: gira 14s linear infinite; z-index: -1; }
+.insignia.grande { width: 140px; height: 140px; margin: 0 auto 16px; animation: estoura .8s .1s cubic-bezier(.3,1.8,.5,1) both; }
+.insignia.grande strong { font-size: 3.6rem; }
+.celebra-titulo { font-family: var(--fonte-titulo); text-transform: uppercase; font-size: 2.4rem; line-height: 1; color: var(--brand); }
+.celebra-nome { font-size: 1.3rem; font-weight: 800; margin: 6px 0 12px; }
+.celebra-cartao small { color: #9fb0c4; }
+
+/* chip de XP e barra do app */
+.chip-xp .nivel-n { transition: transform .3s; }
+.chip-xp:hover .nivel-n { transform: rotate(-10deg) scale(1.1); }
+.barra-app a.ativo .ico { animation: estoura .45s cubic-bezier(.3,1.8,.5,1); }
+.medalha.ganha .ic { display: inline-block; transition: transform .3s cubic-bezier(.3,1.8,.5,1); }
+.medalha.ganha:hover .ic { transform: scale(1.25) rotate(-8deg); }
+
+/* menos movimento para quem pediu isso no sistema */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  .revelar { opacity: 1; transform: none; }
+  .arte-animada .corrente, .arte-animada .faisca { display: none; }
+  .hero h1 em { color: var(--brand); background: none; }
+}
+@media (max-width: 1060px) { #chip { margin-left: auto; } }
+@media print { .revelar { opacity: 1 !important; transform: none !important; } }

@@ -133,7 +133,7 @@
       });
       const s = resumo();
       MEDALHAS.forEach((m) => {
-        if (!d.medalhas[m.id] && m.ok(s)) { d.medalhas[m.id] = Date.now(); toast(m.ic, `Medalha: ${m.nome}`, m.desc); }
+        if (!d.medalhas[m.id] && m.ok(s)) { d.medalhas[m.id] = Date.now(); toast(m.ic, `Medalha: ${m.nome}`, m.desc, "medalha"); setTimeout(() => Efeitos.confete(innerWidth - 120, innerHeight - 90, 40), 150); }
       });
       gravar(CH, d);
       gravar("rota-progresso", prog);
@@ -145,7 +145,7 @@
       marcarDia();
       toast(ic || "⚡", `+${n} XP`, motivo);
       const nv = nivelDe(d.xp);
-      if (nv.n > antes) toast("⬆️", `Nível ${nv.n}: ${nv.nome}`, "Você subiu de nível!");
+      if (nv.n > antes) { toast("⬆️", `Nível ${nv.n}: ${nv.nome}`, "Você subiu de nível!"); setTimeout(() => Efeitos.nivel(nv.n, nv.nome), 400); }
     }
 
     return {
@@ -324,16 +324,134 @@
 
   // ---------------------------------------------------------------- avisos (toasts)
   let caixaToasts = null;
-  function toast(ic, titulo, texto) {
+  function toast(ic, titulo, texto, tipo) {
     if (!document.body) return;
     if (!caixaToasts) { caixaToasts = document.createElement("div"); caixaToasts.className = "toasts"; caixaToasts.setAttribute("aria-live", "polite"); document.body.appendChild(caixaToasts); }
     const t = document.createElement("div");
-    t.className = "toast";
+    t.className = `toast${tipo ? " toast-" + tipo : ""}`;
     t.innerHTML = `<span class="ic">${ic}</span><div><b>${esc(titulo)}</b>${texto ? `<small>${esc(texto)}</small>` : ""}</div>`;
     caixaToasts.appendChild(t);
     while (caixaToasts.children.length > 4) caixaToasts.firstChild.remove();
     setTimeout(() => { t.classList.add("sai"); setTimeout(() => t.remove(), 320); }, 3200);
   }
+
+  // ---------------------------------------------------------------- animações e efeitos
+  const Efeitos = (function () {
+    const calmo = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const CORES = ["#f5b300", "#ffd34d", "#1f8a4c", "#4cc283", "#2563a8", "#ffffff", "#c4473a"];
+    // confete saindo de um ponto (x, y) da tela; sem ponto = do topo
+    function confete(x, y, qtd) {
+      if (calmo() || !document.body.animate) return;
+      const n = qtd || 90;
+      const cx = x == null ? innerWidth / 2 : x, cy = y == null ? innerHeight * 0.35 : y;
+      for (let i = 0; i < n; i++) {
+        const p = document.createElement("i");
+        p.className = "confete";
+        const tam = 6 + Math.random() * 7;
+        p.style.cssText = `left:${cx}px;top:${cy}px;width:${tam}px;height:${tam * (Math.random() < .5 ? .45 : 1)}px;background:${CORES[i % CORES.length]};border-radius:${Math.random() < .3 ? "50%" : "2px"}`;
+        document.body.appendChild(p);
+        const ang = Math.random() * Math.PI * 2, forca = 120 + Math.random() * 260;
+        const dx = Math.cos(ang) * forca, dy = Math.sin(ang) * forca - 160;
+        const queda = 320 + Math.random() * 380, giro = (Math.random() - .5) * 1080;
+        p.animate([
+          { transform: "translate(-50%,-50%) rotate(0)", opacity: 1 },
+          { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${giro / 2}deg)`, opacity: 1, offset: .35 },
+          { transform: `translate(calc(-50% + ${dx * 1.3}px), calc(-50% + ${dy + queda}px)) rotate(${giro}deg)`, opacity: 0 }
+        ], { duration: 1400 + Math.random() * 900, easing: "cubic-bezier(.2,.7,.4,1)", fill: "forwards" }).onfinish = () => p.remove();
+      }
+    }
+    function confeteDe(el, qtd) { const r = el.getBoundingClientRect(); confete(r.left + r.width / 2, r.top + r.height / 2, qtd); }
+    // "+10 XP" subindo a partir de um elemento
+    function voarXp(el, texto) {
+      if (calmo() || !el || !document.body.animate) return;
+      const r = el.getBoundingClientRect();
+      const v = document.createElement("span");
+      v.className = "xp-voa";
+      v.textContent = texto;
+      v.style.left = `${r.left + r.width - 40}px`;
+      v.style.top = `${r.top + r.height / 2}px`;
+      document.body.appendChild(v);
+      v.animate([
+        { transform: "translate(-50%,-50%) scale(.6)", opacity: 0 },
+        { transform: "translate(-50%,-110%) scale(1.15)", opacity: 1, offset: .25 },
+        { transform: "translate(-50%,-320%) scale(1)", opacity: 0 }
+      ], { duration: 1200, easing: "ease-out", fill: "forwards" }).onfinish = () => v.remove();
+    }
+    // reinicia uma animação CSS de "pulsar" num elemento
+    function pulsar(el, classe) {
+      if (!el) return;
+      const c = classe || "pulsa";
+      el.classList.remove(c); void el.offsetWidth; el.classList.add(c);
+    }
+    // número contando de 0 até o valor (mantém o formato: "1.234", "67%")
+    function contar(el, dur) {
+      if (!el || el.dataset.contado) return;
+      const txt = el.textContent.trim();
+      const m = txt.match(/^([^0-9]*)([0-9][0-9.]*)(.*)$/);
+      if (!m) return;
+      el.dataset.contado = "1";
+      const alvo = Number(m[2].replace(/\./g, ""));
+      if (!alvo || calmo()) return;
+      const t0 = performance.now(), d = dur || 1100;
+      const passo = (t) => {
+        const k = Math.min(1, (t - t0) / d), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = m[1] + Math.round(alvo * e).toLocaleString("pt-BR") + m[3];
+        if (k < 1) requestAnimationFrame(passo); else el.textContent = txt;
+      };
+      requestAnimationFrame(passo);
+    }
+    // celebração de subir de nível (tela cheia, some sozinha)
+    function nivel(n, nome) {
+      const f = document.createElement("div");
+      f.className = "celebra";
+      f.innerHTML = `<div class="celebra-cartao"><div class="raios"></div><div class="insignia grande"><div><strong>${n}</strong><small>nível</small></div></div>
+        <div class="celebra-titulo">Subiu de nível!</div><div class="celebra-nome">${esc(nome)}</div><small>toque para continuar</small></div>`;
+      document.body.appendChild(f);
+      requestAnimationFrame(() => f.classList.add("aberta"));
+      setTimeout(() => confete(innerWidth / 2, innerHeight / 2, 140), 250);
+      const fechar = () => { f.classList.remove("aberta"); setTimeout(() => f.remove(), 350); };
+      f.addEventListener("click", fechar);
+      setTimeout(fechar, 4200);
+    }
+    // entrada suave dos blocos ao rolar a página
+    let obs = null;
+    const SELETOR = ".cartao, .passo, .bloco, .modulo, .resultado, .stat, .diagrama, .secao-titulo, .quiz, .aula-texto table, .medalha, .curso-linha";
+    function revelar(raiz) {
+      if (!obs) return;
+      const contagem = new Map();
+      (raiz || document).querySelectorAll(SELETOR).forEach((el) => {
+        if (el.dataset.rev || el.closest(".hero")) return;
+        el.dataset.rev = "1";
+        const pai = el.parentElement, i = contagem.get(pai) || 0;
+        contagem.set(pai, i + 1);
+        el.style.transitionDelay = `${Math.min(i, 8) * 60}ms`;
+        el.classList.add("revelar");
+        obs.observe(el);
+      });
+    }
+    if ("IntersectionObserver" in window && !calmo()) {
+      let disparou = false;
+      // garantia: se o observador nunca responder (navegador antigo/aba em segundo plano), mostra tudo
+      setTimeout(() => { if (!disparou) document.querySelectorAll(".revelar").forEach((el) => el.classList.add("visivel")); }, 3000);
+      obs = new IntersectionObserver((ents) => ents.forEach((e) => {
+        disparou = true;
+        if (e.isIntersecting) {
+          e.target.classList.add("visivel");
+          e.target.querySelectorAll(".v, .grande, .placar").forEach((n) => contar(n));
+          obs.unobserve(e.target);
+          setTimeout(() => { e.target.style.transitionDelay = ""; }, 900);
+        }
+      }), { rootMargin: "0px 0px -8% 0px", threshold: 0.06 });
+      const main = document.querySelector("main");
+      if (main && "MutationObserver" in window) {
+        let fila = false;
+        new MutationObserver(() => { if (!fila) { fila = true; requestAnimationFrame(() => { fila = false; revelar(main); }); } })
+          .observe(main, { childList: true, subtree: true });
+      }
+    }
+    return { confete, confeteDe, voarXp, pulsar, contar, nivel, revelar, calmo };
+  })();
+  window.RotaEfeitos = Efeitos;
 
   // ---------------------------------------------------------------- cabeçalho e rodapé
   const pagina = document.body.dataset.pagina || "";
@@ -353,7 +471,12 @@
       <button class="menu-botao" aria-label="Abrir menu" aria-controls="menu">☰</button>
     </div>`;
     topo.querySelector(".menu-botao").addEventListener("click", () => topo.querySelector(".menu").classList.toggle("aberto"));
-    Aluno.aoMudar(() => { const c = document.getElementById("chip"); if (c) c.innerHTML = chipXp(); });
+    let xpAntes = Aluno.dados.xp;
+    Aluno.aoMudar(() => {
+      const c = document.getElementById("chip"); if (!c) return;
+      c.innerHTML = chipXp();
+      if (Aluno.dados.xp !== xpAntes) { Efeitos.pulsar(c.firstElementChild, "pulsa"); xpAntes = Aluno.dados.xp; }
+    });
   }
   const rodape = document.getElementById("rodape");
   if (rodape) {
@@ -756,8 +879,10 @@
           exp.className = "explicacao";
           exp.innerHTML = `${certo ? '<b class="ok">✔ Correto!</b>' : '<b class="nok">✘ Não foi dessa vez.</b>'}${r.revisao ? ' <small style="color:var(--muted)">(revisão)</small>' : ""}${questoes[i].explicacao}`;
           el.appendChild(exp);
+          if (certo && !r.revisao) Efeitos.voarXp(b, `+${XP.acerto} XP`);
+          if (!certo) Efeitos.pulsar(b, "treme");
           const s = caixa.querySelector("[data-seq]");
-          if (s) s.textContent = `🔥 Sequência: ${Aluno.dados.seq}`;
+          if (s) { s.textContent = `🔥 Sequência: ${Aluno.dados.seq}`; if (certo && !r.revisao) Efeitos.pulsar(s, "pulsa"); }
           if (respostas.every((x) => x !== null)) concluir();
         });
       });
@@ -775,6 +900,9 @@
           <button class="botao botao-secundario botao-pequeno" data-refazer>↻ Refazer</button>
           ${feita ? "" : `<button class="botao botao-primario botao-pequeno" data-concluir>Concluir aula (+${XP.aula} XP)</button>`}`;
         res.querySelector("[data-refazer]").addEventListener("click", () => { iniciar(); caixa.scrollIntoView({ behavior: "smooth", block: "start" }); });
+        Efeitos.pulsar(res.querySelector(".placar"), "estoura");
+        if (nota === 100) setTimeout(() => Efeitos.confeteDe(res.querySelector(".placar"), 120), 200);
+        else if (nota >= 70) setTimeout(() => Efeitos.confeteDe(res.querySelector(".placar"), 40), 200);
         const bc = res.querySelector("[data-concluir]");
         if (bc) bc.addEventListener("click", () => { aoConcluirAula(); bc.remove(); });
       }
@@ -846,7 +974,11 @@
           document.getElementById("lateral").innerHTML = lateral();
         };
         const concluir = () => { if (!Aluno.aulaFeita(c.id, k)) Aluno.alternarAula(c.id, k, aula.titulo); atualizarBotao(); };
-        botao.addEventListener("click", () => { Aluno.alternarAula(c.id, k, aula.titulo); atualizarBotao(); });
+        botao.addEventListener("click", () => {
+          const feita = Aluno.alternarAula(c.id, k, aula.titulo);
+          atualizarBotao();
+          if (feita) { Efeitos.confeteDe(botao, 50); Efeitos.pulsar(botao, "estoura"); }
+        });
         atualizarBotao();
         montarQuiz(paginaAula.querySelector(".aula-texto"), c, k, aula.titulo, concluir);
       }
@@ -1194,4 +1326,8 @@
       }
     }
   }
+
+  // ---------------------------------------------------------------- animações iniciais
+  Efeitos.revelar(document.querySelector("main"));
+  document.querySelectorAll(".numeros strong, .painel-progresso .grande").forEach((n, i) => setTimeout(() => Efeitos.contar(n), 350 + i * 120));
 })();
