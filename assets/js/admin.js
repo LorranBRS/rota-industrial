@@ -77,6 +77,7 @@
   const SECOES = [
     { id: "geral", nome: "Visão geral", ic: "📊" },
     { id: "alunos", nome: "Alunos", ic: "👥" },
+    { id: "duvidas", nome: "Dúvidas", ic: "💬" },
     { id: "cursos", nome: "Cursos", ic: "📚" },
     { id: "questoes", nome: "Questões", ic: "📝" },
     { id: "certificados", nome: "Certificados", ic: "🎓" },
@@ -100,6 +101,15 @@
     document.getElementById("adm-sair").addEventListener("click", async (e) => { e.preventDefault(); await On.sair(); location.href = "index.html"; });
     window.addEventListener("hashchange", () => { secao = location.hash.slice(1) || "geral"; abrir(); });
     abrir();
+    contadores();
+    setInterval(contadores, 60000);
+  }
+  async function contadores() {
+    try {
+      const c = await rpc("adm_contadores");
+      const a = raiz.querySelector('[data-sec="duvidas"]');
+      if (a) { const v = a.querySelector(".adm-badge"); if (v) v.remove(); if (c.duvidas_pendentes) a.insertAdjacentHTML("beforeend", `<span class="adm-badge">${c.duvidas_pendentes}</span>`); }
+    } catch (e) { /* ignora */ }
   }
   async function abrir() {
     if (!SECOES.some((s) => s.id === secao)) secao = "geral";
@@ -107,7 +117,7 @@
     const s = SECOES.find((x) => x.id === secao);
     conteudo.innerHTML = `<div class="adm-cabeca"><h1>${s.ic} ${s.nome}</h1><div id="adm-cabeca-acoes"></div></div><div id="adm-corpo"><div class="adm-carregando">Carregando…</div></div>`;
     const corpo = document.getElementById("adm-corpo");
-    try { await ({ geral, alunos, cursos, questoes, certificados, aviso, registro })[secao](corpo); }
+    try { await ({ geral, alunos, duvidas, cursos, questoes, certificados, aviso, registro })[secao](corpo); }
     catch (e) {
       if (/permissão|sessão/i.test(e.message)) return telaLogin(e.message);
       corpo.innerHTML = `<div class="bloco"><p class="erro-msg">⚠ ${esc(e.message)}</p><button class="botao botao-secundario botao-pequeno" onclick="location.reload()">Tentar de novo</button></div>`;
@@ -311,17 +321,59 @@
     return { corpo: f.querySelector(".gaveta-corpo"), fechar };
   }
 
+  // ------------------------------------------------------------ dúvidas dos alunos
+  let filtroDuv = "pendente";
+  async function duvidas(corpo) {
+    const ABAS = [["pendente", "Aguardando resposta"], ["respondida", "Respondidas"], ["oculta", "Ocultas"], ["todas", "Todas"]];
+    corpo.innerHTML = `<div class="filtros" id="dv-abas">${ABAS.map(([v, t]) => `<button class="filtro ${filtroDuv === v ? "ativo" : ""}" data-f="${v}">${t}</button>`).join("")}</div><div id="dv-lista"><div class="adm-carregando">Carregando…</div></div>`;
+    corpo.querySelectorAll("[data-f]").forEach((b) => b.addEventListener("click", () => { filtroDuv = b.dataset.f; duvidas(corpo); }));
+    const l = await rpc("adm_duvidas", { p_status: filtroDuv });
+    const el = corpo.querySelector("#dv-lista");
+    el.innerHTML = l.length ? l.map((d) => { const t = tituloAula(`${d.curso}/${d.aula}`); return `<article class="bloco adm-duvida" data-id="${d.id}">
+        <div class="adm-duvida-topo"><div><b>${esc(d.nome || d.apelido)}</b> <small style="color:var(--muted)">@${esc(d.apelido)} · ${atras(d.criado)}</small><br>
+          <a href="aula.html?curso=${encodeURIComponent(d.curso)}&aula=${encodeURIComponent(d.aula)}#duvidas" target="_blank" rel="noopener"><small>${esc(t.curso)} · ${esc(t.aula)} ↗</small></a></div>
+          <span class="selo ${d.status === "pendente" ? "selo-breve" : d.status === "respondida" ? "selo-ok" : ""}">${d.status}</span></div>
+        <p class="adm-duvida-texto">${esc(d.texto).replace(/\n/g, "<br>")}</p>
+        ${d.resposta ? `<div class="duvida-resposta"><b>Resposta</b> <small>${esc(d.respondido_por || "")} · ${atras(d.respondido_em)} · ${d.publica ? "pública" : "só para o aluno"}</small><p>${esc(d.resposta).replace(/\n/g, "<br>")}</p></div>` : ""}
+        <details ${d.status === "pendente" ? "open" : ""}><summary>${d.resposta ? "Editar resposta" : "Responder"}</summary>
+          <textarea class="campo-claro" rows="4" maxlength="4000" placeholder="Escreva a resposta…">${esc(d.resposta || "")}</textarea>
+          <label class="check"><input type="checkbox" ${d.publica === false ? "" : "checked"}> Mostrar para todos os alunos nesta aula (sem isso, só o autor vê)</label>
+          <div class="adm-acoes"><button class="botao botao-primario botao-pequeno" data-responder>Enviar resposta</button>
+            ${d.status !== "oculta" ? '<button class="botao botao-secundario botao-pequeno" data-ac="ocultar">Ocultar</button>' : ""}
+            ${d.status !== "pendente" ? '<button class="botao botao-secundario botao-pequeno" data-ac="reabrir">Reabrir</button>' : ""}
+            <button class="botao botao-secundario botao-pequeno" data-ac="apagar" style="color:var(--erro)">Apagar</button></div>
+        </details></article>`; }).join("") : `<p class="vazio">${filtroDuv === "pendente" ? "Nenhuma dúvida esperando resposta. 🎉" : "Nada aqui."}</p>`;
+    el.querySelectorAll(".adm-duvida").forEach((art) => {
+      const id = Number(art.dataset.id);
+      art.querySelector("[data-responder]").addEventListener("click", async (e) => {
+        const b = e.currentTarget; b.disabled = true;
+        try {
+          await rpc("adm_responder_duvida", { p_id: id, p_resposta: art.querySelector("textarea").value, p_publica: art.querySelector(".check input").checked });
+          toast("💬", "Resposta enviada"); duvidas(corpo); contadores();
+        } catch (err) { toast("⚠️", "Erro", err.message); b.disabled = false; }
+      });
+      art.querySelectorAll("[data-ac]").forEach((b) => b.addEventListener("click", async () => {
+        const ac = b.dataset.ac;
+        if (ac === "apagar" && !confirm("Apagar esta dúvida de vez?")) return;
+        try { await rpc("adm_duvida_acao", { p_id: id, p_acao: ac }); toast("✔️", "Feito"); duvidas(corpo); contadores(); }
+        catch (err) { toast("⚠️", "Erro", err.message); }
+      }));
+    });
+    cabecaAcoes(`<button class="botao botao-secundario botao-pequeno" id="atualizar">↻ Atualizar</button>`, { atualizar: () => abrir() });
+  }
+
   // ------------------------------------------------------------ cursos (status no site)
   async function cursos(corpo) {
-    const [cfg, r] = await Promise.all([On.rpc("rota_config"), rpc("adm_resumo")]);
+    const [cfg, r, sims] = await Promise.all([On.rpc("rota_config"), rpc("adm_resumo"), rpc("adm_simulados")]);
     const st = Object.assign({}, cfg.cursos || {});
     const stats = Object.fromEntries(r.cursos.map((c) => [c.id, c]));
     const ROT = { disponivel: "Disponível", "em-breve": "Em breve", oculto: "Oculto" };
     corpo.innerHTML = `<div class="bloco"><p class="secao-sub">Mude como cada curso aparece no site. <b>Em breve</b>: aparece no catálogo com o selo "Em breve". <b>Oculto</b>: some do site (quem tiver o link direto da aula ainda abre).</p>
-      <div class="tabela-rolagem"><table class="tabela"><thead><tr><th>Curso</th><th>Aulas</th><th>Começaram</th><th>Concluíram</th><th>Média</th><th>Status no site</th></tr></thead><tbody>
+      <div class="tabela-rolagem"><table class="tabela"><thead><tr><th>Curso</th><th>Aulas</th><th>Começaram</th><th>Concluíram</th><th>Média</th><th>Simulado</th><th>Status no site</th></tr></thead><tbody>
       ${CURSOS.map((c) => { const s2 = stats[c.id] || {}; const atual = st[c.id] || c.status; return `<tr>
         <td><a href="curso.html?id=${c.id}" target="_blank" rel="noopener"><b>${esc(c.titulo)}</b></a><br><small style="color:var(--muted)">${esc(c.nivel)} · ${esc(c.cargaHoraria)}</small></td>
         <td>${aulasDoCurso(c).length}</td><td>${s2.iniciaram || 0}</td><td>${s2.concluiram || 0}</td><td>${s2.media != null ? s2.media + "%" : "—"}</td>
+        <td>${sims[c.id] ? `${sims[c.id].aprovados}/${sims[c.id].alunos} aprov. · média ${sims[c.id].media}%` : "—"}</td>
         <td><select class="campo-claro" data-curso="${c.id}">${Object.entries(ROT).map(([v, t]) => `<option value="${v}" ${atual === v ? "selected" : ""}>${t}</option>`).join("")}</select></td></tr>`; }).join("")}
       </tbody></table></div>
       <button class="botao botao-primario" id="c-salvar" style="margin-top:14px">Salvar status</button>
@@ -422,7 +474,8 @@
     const NOMES = { resetar_senha: "gerou senha nova", bloquear: "bloqueou", desbloquear: "desbloqueou", ocultar_ranking: "tirou do ranking", mostrar_ranking: "voltou ao ranking",
       apelido: "mudou o apelido", nome: "mudou o nome", admin_on: "deu acesso admin", admin_off: "removeu acesso admin", encerrar_sessoes: "desconectou aparelhos",
       zerar_progresso: "zerou o progresso", apagar: "apagou a conta", revogar_certificado: "revogou certificado", restaurar_certificado: "restaurou certificado",
-      config_aviso: "alterou o aviso do site", config_cursos: "alterou o status dos cursos" };
+      config_aviso: "alterou o aviso do site", config_cursos: "alterou o status dos cursos",
+      responder_duvida: "respondeu", ocultar_duvida: "ocultou", reabrir_duvida: "reabriu", apagar_duvida: "apagou" };
     corpo.innerHTML = `<div class="bloco"><p class="secao-sub">Tudo o que os administradores fizeram no painel (últimas 200 ações).</p>
       ${l.length ? `<div class="tabela-rolagem"><table class="tabela"><thead><tr><th>Quando</th><th>Quem</th><th>O quê</th><th>Alvo</th></tr></thead><tbody>
         ${l.map((e) => `<tr><td>${data(e.quando, true)}</td><td>${esc(e.admin || "—")}</td><td>${esc(NOMES[e.acao] || e.acao)}${e.detalhes && e.detalhes.valor ? `: <i>${esc(e.detalhes.valor)}</i>` : ""}</td><td>${esc(e.alvo || "")}</td></tr>`).join("")}

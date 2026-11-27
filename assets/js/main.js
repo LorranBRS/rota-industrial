@@ -85,15 +85,18 @@
     { id: "dias-7", ic: "🗓️", nome: "Semana cheia", desc: "7 dias seguidos estudando", ok: (s) => s.diasMelhor >= 7 },
     { id: "seguranca", ic: "🦺", nome: "Segurança em 1º lugar", desc: "Concluiu Segurança em Eletricidade", ok: (s) => s.cursosFeitos.includes("seguranca-eletricidade") },
     { id: "um-curso", ic: "🎓", nome: "Formado", desc: "Concluiu um curso inteiro", ok: (s) => s.cursosFeitos.length >= 1 },
+    { id: "simulado", ic: "🎖️", nome: "Aprovado no simulado", desc: "70 % ou mais num simulado final", ok: (s) => s.simAprovados >= 1 },
+    { id: "simulado-100", ic: "💯", nome: "Simulado perfeito", desc: "100 % num simulado final", ok: (s) => s.simPerfeitos >= 1 },
     { id: "trilha", ic: "🏆", nome: "Rota completa", desc: "Concluiu toda a trilha de Elétrica", ok: (s) => s.cursosFeitos.length >= cursos.filter((c) => c.area === "eletrica").length }
   ];
-  const XP = { aula: 20, acerto: 10, gabarito: 20, curso: 100 };
+  const XP = { aula: 20, acerto: 10, gabarito: 20, curso: 100, simulado: 80 };
 
   // ---------------------------------------------------------------- aluno (estado persistente)
   const Aluno = (function () {
     const CH = "rota-aluno";
     const novo = () => ({ versao: 1, apelido: "", nomeCertificado: "", xp: 0, seq: 0, seqMelhor: 0, respostas: 0, acertos: 0,
-      respondidas: {}, quizzes: {}, medalhas: {}, xpAulas: {}, cursosXp: {}, dias: [], diasMelhor: 0, ultima: null, criado: Date.now() });
+      respondidas: {}, quizzes: {}, medalhas: {}, xpAulas: {}, cursosXp: {}, dias: [], diasMelhor: 0, ultima: null, criado: Date.now(),
+      favoritos: {}, notas: {}, simulados: {} });
     let d = Object.assign(novo(), ler(CH, {}));
     // progresso das aulas (formato antigo, mantido): {"curso/m-a": timestamp}
     let prog = ler("rota-progresso", {});
@@ -122,7 +125,8 @@
       const qs = Object.values(d.quizzes);
       const cursosFeitos = cursos.filter((c) => aulasDoCurso(c).every((x) => prog[`${c.id}/${x.k}`])).map((c) => c.id);
       const media = qs.length ? Math.round(qs.reduce((n, q) => n + q.melhor, 0) / qs.length) : null;
-      return { xp: d.xp, aulas, testes: qs.length, perfeitos: qs.filter((q) => q.melhor === 100).length, seq: d.seq, seqMelhor: d.seqMelhor,
+      const sims = Object.values(d.simulados || {});
+      return { simAprovados: sims.filter((x) => x.melhor >= 70).length, simPerfeitos: sims.filter((x) => x.melhor === 100).length, xp: d.xp, aulas, testes: qs.length, perfeitos: qs.filter((q) => q.melhor === 100).length, seq: d.seq, seqMelhor: d.seqMelhor,
         diasMelhor: d.diasMelhor, dias: diasSeguidos(), cursosFeitos, respostas: d.respostas, acertos: d.acertos, media };
     }
     function salvar() {
@@ -199,6 +203,30 @@
         gravar(CH, d); gravar("rota-progresso", prog);
       },
       zerar() { d = novo(); prog = {}; gravar(CH, d); gravar("rota-progresso", prog); },
+      // favoritos e anotações pessoais (vão junto para a conta)
+      favorito: (cid, k) => !!(d.favoritos || {})[`${cid}/${k}`],
+      alternarFavorito(cid, k) {
+        const ch = `${cid}/${k}`; d.favoritos = d.favoritos || {};
+        if (d.favoritos[ch]) delete d.favoritos[ch]; else d.favoritos[ch] = Date.now();
+        salvar(); return !!d.favoritos[ch];
+      },
+      nota: (cid, k) => ((d.notas || {})[`${cid}/${k}`] || {}).texto || "",
+      salvarNota(cid, k, texto) {
+        const ch = `${cid}/${k}`; d.notas = d.notas || {};
+        if (!String(texto).trim()) delete d.notas[ch]; else d.notas[ch] = { texto: String(texto).slice(0, 5000), data: Date.now() };
+        salvar();
+      },
+      // simulado final de um curso
+      simulado: (cid) => (d.simulados || {})[cid] || null,
+      registrarSimulado(cid, nota, segundos) {
+        d.simulados = d.simulados || {};
+        const x = d.simulados[cid] || { melhor: 0, tentativas: 0 };
+        x.tentativas++; x.ultima = nota; x.melhor = Math.max(x.melhor, nota); x.data = Date.now(); x.tempo = segundos;
+        d.simulados[cid] = x;
+        if (nota >= 70 && !x.xp) { x.xp = 1; ganhar(XP.simulado, `Aprovado no simulado: ${(acharCurso(cid) || {}).titulo}`, "🎖️"); }
+        salvar();
+        return x;
+      },
       // junta o progresso salvo online (outro aparelho) com o deste navegador, sem perder nada
       mesclar(remoto) {
         if (!remoto) return;
@@ -215,6 +243,14 @@
         if (!d.apelido && r.apelido) d.apelido = r.apelido;
         if (!d.nomeCertificado && r.nomeCertificado) d.nomeCertificado = r.nomeCertificado;
         d.certificados = Object.assign({}, r.certificados || {}, d.certificados || {});
+        d.favoritos = Object.assign({}, r.favoritos || {}, d.favoritos || {});
+        d.notas = Object.assign({}, d.notas || {});
+        Object.entries(r.notas || {}).forEach(([ch, n]) => { if (!d.notas[ch] || (n.data || 0) > (d.notas[ch].data || 0)) d.notas[ch] = n; });
+        d.simulados = Object.assign({}, d.simulados || {});
+        Object.entries(r.simulados || {}).forEach(([cid, x]) => {
+          const l = d.simulados[cid];
+          d.simulados[cid] = !l ? x : Object.assign({}, l, { melhor: Math.max(l.melhor, x.melhor), tentativas: Math.max(l.tentativas, x.tentativas), xp: l.xp || x.xp });
+        });
         gravar(CH, d); gravar("rota-progresso", prog);
         ouvintes.forEach((f) => { try { f(d); } catch (e) { /* ignora */ } });
       }
@@ -245,7 +281,15 @@
       nome_invalido: "Digite o nome completo (3 a 80 caracteres).",
       sem_permissao: "Você não tem permissão para isso.",
       nao_em_si_mesmo: "Você não pode fazer isso com a sua própria conta.",
-      aluno_nao_encontrado: "Aluno não encontrado."
+      aluno_nao_encontrado: "Aluno não encontrado.",
+      duvida_curta: "Escreva a dúvida com pelo menos 10 caracteres.",
+      duvida_longa: "A dúvida pode ter no máximo 1.000 caracteres.",
+      muitas_pendentes: "Você já tem 5 dúvidas esperando resposta. Aguarde as respostas para mandar mais.",
+      limite_diario: "Limite de 10 dúvidas por dia atingido. Tente amanhã.",
+      aula_invalida: "Aula inválida.",
+      duvida_nao_encontrada: "Dúvida não encontrada.",
+      resposta_curta: "Escreva a resposta.",
+      simulado_pendente: "Falta passar no simulado final do curso (70 % ou mais)."
     };
     const msg = (m) => ERROS[m] || `Erro no servidor (${m}).`;
     async function rpc(fn, args) {
@@ -540,7 +584,7 @@
     topo.innerHTML = `<div class="container">
       <a class="logo" href="index.html"><span class="logo-icone"><span>RI</span></span><span>Rota <b>Industrial</b></span></a>
       <nav class="menu" id="menu">
-        ${item("index.html", "inicio", "Início")}${item("cursos.html", "cursos", "Cursos")}${item("busca.html", "busca", "Buscar", "busca")}${item("ranking.html", "ranking", "Ranking", "trofeu")}${item("perfil.html", "perfil", "Meu progresso")}${item("sobre.html", "sobre", "Sobre")}
+        ${item("index.html", "inicio", "Início")}${item("cursos.html", "cursos", "Cursos")}${item("ferramentas.html", "ferramentas", "Calculadoras", "calc")}${item("busca.html", "busca", "Buscar", "busca")}${item("ranking.html", "ranking", "Ranking", "trofeu")}${item("perfil.html", "perfil", "Meu progresso")}${item("sobre.html", "sobre", "Sobre")}
       </nav>
       <span id="chip">${chipXp()}</span>
       <button class="menu-botao" aria-label="Abrir menu" aria-controls="menu">☰</button>
@@ -561,7 +605,7 @@
       <div class="colunas">
         <div><a class="logo" href="index.html"><span class="logo-icone"><span>RI</span></span><span>Rota <b>Industrial</b></span></a>
           <p>Cursos práticos de elétrica para os setores industrial, residencial e comercial. Conteúdo introdutório: não substitui as capacitações obrigatórias (como a NR-10).</p></div>
-        <div><h4>Estudar</h4><a href="cursos.html">Catálogo de cursos</a><a href="busca.html">Buscar nas aulas</a><a href="perfil.html">Meu progresso</a><a href="ranking.html">Ranking</a><a href="verificar.html">Verificar certificado</a></div>
+        <div><h4>Estudar</h4><a href="cursos.html">Catálogo de cursos</a><a href="ferramentas.html">Calculadoras elétricas</a><a href="anotacoes.html">Minhas anotações</a><a href="busca.html">Buscar nas aulas</a><a href="perfil.html">Meu progresso</a><a href="ranking.html">Ranking</a><a href="verificar.html">Verificar certificado</a></div>
         <div><h4>Projeto</h4><a href="sobre.html">Sobre</a><a href="https://github.com/LorranBRS/rota-industrial" target="_blank" rel="noopener">Código no GitHub</a></div>
       </div>
       <div class="linha"><span>© ${new Date().getFullYear()} Rota Industrial</span><span>Feito no Brasil 🇧🇷</span></div>
@@ -694,8 +738,9 @@
     const media = notas.length ? Math.round(notas.reduce((a, b) => a + b, 0) / notas.length) : null;
     const proxima = todas.find((x) => !Aluno.aulaFeita(c.id, x.k)) || todas[0];
     const testesOk = comTeste.every((x) => { const q = Aluno.notaTeste(c.id, x.k); return q && q.melhor >= 70; });
+    const sim = Aluno.simulado(c.id), simOk = !!(sim && sim.melhor >= 70);
     return { todas, feitas, total: todas.length, pct: Math.round((feitas / todas.length) * 100), media, notas: notas.length, comTeste: comTeste.length, proxima,
-      certificado: feitas === todas.length && testesOk, testesOk };
+      certificado: feitas === todas.length && testesOk && simOk, testesOk, sim, simOk };
   }
   const seloStatus = (st) => st === "disponivel" ? '<span class="selo selo-ok">Disponível</span>' : '<span class="selo selo-breve">Em breve</span>';
 
@@ -847,7 +892,8 @@
             <div class="progresso"><div class="progresso-barra" style="width:${e.pct}%"></div></div>
             <a class="botao botao-primario" href="${linkAula(c.id, e.proxima.k)}">${e.feitas ? (e.feitas === e.total ? "Revisar o curso" : "Continuar") : "Começar pela 1ª aula"} →</a>
             ${e.certificado ? `<a class="botao botao-secundario" style="margin-top:8px;background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" href="certificado.html?curso=${c.id}">🎓 Ver certificado</a>` : ""}
-            <small>${e.media != null ? `Média nos testes: <b>${e.media}%</b> (${e.notas} de ${e.comTeste})` : "Os testes de cada aula valem XP."}<br>Certificado: concluir todas as aulas e tirar 70% ou mais em todos os testes.</small>
+            <a class="botao botao-secundario" style="margin-top:8px;background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" href="simulado.html?curso=${c.id}">🎯 Simulado final${e.sim ? ` · melhor ${e.sim.melhor}%` : ""}</a>
+            <small>${e.media != null ? `Média nos testes: <b>${e.media}%</b> (${e.notas} de ${e.comTeste})` : "Os testes de cada aula valem XP."}<br>Certificado: concluir todas as aulas, 70% ou mais em todos os testes e no simulado final.</small>
           </div>
         </div></div>
         <section><div class="container">
@@ -974,6 +1020,74 @@
     iniciar();
   }
 
+  // ---------------------------------------------------------------- dúvidas nas aulas
+  const Duvidas = (function () {
+    const VISTAS = "rota-duvidas-vistas";
+    const data = (t) => new Date(t).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    function montar(el, c, k, titulo) {
+      if (!el) return;
+      const volta = encodeURIComponent(`aula.html?curso=${c.id}&aula=${k}`);
+      el.innerHTML = `<div class="duvidas-cabeca"><h2>💬 Dúvidas sobre esta aula</h2></div>
+        ${Online.ativo ? `<form class="duvida-form" id="duvida-form"><textarea id="duvida-texto" rows="3" maxlength="1000" placeholder="Ficou com alguma dúvida? Escreva aqui. A equipe responde e a resposta aparece nesta aula."></textarea>
+          <div class="duvida-form-rodape"><span class="nota-mini" id="duvida-cont">0/1000</span><button class="botao botao-primario botao-pequeno" id="duvida-enviar">Enviar dúvida</button></div>
+          <p class="erro-msg" id="duvida-erro" role="alert"></p></form>`
+          : `<p class="duvida-login">Para perguntar, <a href="entrar.html?volta=${volta}">entre na sua conta</a> (telefone e senha). As respostas abaixo são para todos.</p>`}
+        <div id="duvidas-lista"><p class="vazio">Carregando…</p></div>`;
+      const lista = el.querySelector("#duvidas-lista");
+      async function carregar() {
+        try {
+          const itens = await Online.rpc("rota_duvidas", { p_curso: c.id, p_aula: k, p_token: Online.estado.token || null });
+          const vistas = ler(VISTAS, {});
+          lista.innerHTML = itens.length ? itens.map((d) => `<article class="duvida ${d.minha ? "minha" : ""}">
+              <div class="duvida-pergunta"><b>${esc(d.apelido)}${d.minha ? " (você)" : ""}</b> <small>${data(d.criado)}</small><p>${esc(d.texto).replace(/\n/g, "<br>")}</p>
+              ${d.status === "pendente" ? `<span class="selo selo-breve">aguardando resposta · só você vê</span> <button class="link-botao" data-apagar="${d.id}">apagar</button>` : ""}
+              ${d.minha && d.status === "respondida" && !d.publica ? '<span class="selo">resposta só para você</span>' : ""}</div>
+              ${d.resposta ? `<div class="duvida-resposta"><b>⚡ Rota Industrial</b> <small>${data(d.respondido_em)}</small><p>${esc(d.resposta).replace(/\n/g, "<br>")}</p></div>` : ""}
+            </article>`).join("") : '<p class="vazio">Nenhuma dúvida respondida nesta aula ainda.</p>';
+          itens.filter((d) => d.minha && d.status === "respondida").forEach((d) => { vistas[d.id] = 1; });
+          gravar(VISTAS, vistas);
+          lista.querySelectorAll("[data-apagar]").forEach((b) => b.addEventListener("click", async () => {
+            if (!confirm("Apagar esta dúvida?")) return;
+            try { await Online.rpc("rota_apagar_duvida", { p_token: Online.estado.token, p_id: Number(b.dataset.apagar) }); carregar(); } catch (e) { toast("⚠️", "Erro", e.message); }
+          }));
+        } catch (e) { lista.innerHTML = `<p class="vazio">⚠ ${esc(e.message)}</p>`; }
+      }
+      const form = el.querySelector("#duvida-form");
+      if (form) {
+        const tx = form.querySelector("#duvida-texto"), cont = form.querySelector("#duvida-cont"), er = form.querySelector("#duvida-erro"), b = form.querySelector("#duvida-enviar");
+        tx.addEventListener("input", () => { cont.textContent = `${tx.value.length}/1000`; });
+        form.addEventListener("submit", async (e) => {
+          e.preventDefault(); er.textContent = ""; b.disabled = true;
+          try {
+            await Online.rpc("rota_enviar_duvida", { p_token: Online.estado.token, p_curso: c.id, p_aula: k, p_texto: tx.value });
+            tx.value = ""; cont.textContent = "0/1000";
+            toast("💬", "Dúvida enviada!", "Você vê a resposta aqui e em Meu progresso.");
+            carregar();
+          } catch (err) { er.textContent = err.message; }
+          b.disabled = false;
+        });
+      }
+      carregar();
+    }
+    // avisa quando uma dúvida do aluno foi respondida (no máximo a cada 10 min)
+    async function verificarRespostas(forcar) {
+      if (!Online.ativo) return [];
+      const ult = ler("rota-duvidas-checagem", 0);
+      if (!forcar && Date.now() - ult < 600000) return null;
+      gravar("rota-duvidas-checagem", Date.now());
+      const minhas = await Online.rpc("rota_minhas_duvidas", { p_token: Online.estado.token }).catch(() => []);
+      const vistas = ler(VISTAS, {});
+      const novas = minhas.filter((d) => d.status === "respondida" && !vistas[d.id]);
+      if (novas.length && !forcar) {
+        const d = novas[0], cc = acharCurso(d.curso);
+        toast("💬", novas.length > 1 ? `${novas.length} dúvidas respondidas!` : "Sua dúvida foi respondida!", cc ? cc.titulo : "Veja em Meu progresso");
+      }
+      return minhas;
+    }
+    return { montar, verificarRespostas, VISTAS };
+  })();
+  if (Online.ativo && document.body.dataset.pagina !== "admin") setTimeout(() => Duvidas.verificarRespostas(false), 2500);
+
   // ---------------------------------------------------------------- página de uma aula
   const paginaAula = document.getElementById("pagina-aula");
   if (paginaAula) {
@@ -1020,7 +1134,13 @@
               ${video}
               <article class="aula-texto">${conteudo && conteudo.texto ? conteudo.texto : '<p class="secao-sub">O material escrito desta aula ainda está sendo preparado.</p>'}</article>
               ${materiais}
-              <div class="aula-acoes"><button class="botao" id="marcar"></button><span class="secao-sub" style="margin:0" id="dica"></span></div>
+              <div class="anotacao" id="anotacao">
+                <div class="anotacao-cabeca"><h3>📝 Minhas anotações</h3><span class="anotacao-status" id="nota-status"></span></div>
+                <textarea id="nota-texto" rows="4" maxlength="5000" placeholder="Escreva aqui o que quiser lembrar desta aula: dúvidas, fórmulas, macetes… Fica salvo sozinho."></textarea>
+                <p class="nota-mini">Só você vê. ${Online.ativo ? "Fica salvo na sua conta." : "Fica neste aparelho (entre na conta para levar junto)."} <a href="anotacoes.html">Ver todas as anotações →</a></p>
+              </div>
+              <div class="aula-acoes"><button class="botao" id="marcar"></button><button class="botao botao-secundario" id="favoritar"></button><span class="secao-sub" style="margin:0" id="dica"></span></div>
+              <section class="duvidas" id="duvidas"></section>
               <nav class="aula-nav">
                 ${anterior ? `<a href="${linkAula(c.id, anterior.k)}"><small>← Anterior</small>${esc(anterior.titulo)}</a>` : ""}
                 ${seguinte ? `<a class="seguinte" href="${linkAula(c.id, seguinte.k)}"><small>Próxima →</small>${esc(seguinte.titulo)}</a>` : `<a class="seguinte" href="${linkCurso(c.id)}"><small>Fim do curso</small>Voltar ao curso</a>`}
@@ -1045,6 +1165,23 @@
         });
         atualizarBotao();
         montarQuiz(paginaAula.querySelector(".aula-texto"), c, k, aula.titulo, concluir);
+
+        // favorito
+        const fav = document.getElementById("favoritar");
+        const desenharFav = () => { const on = Aluno.favorito(c.id, k); fav.textContent = on ? "★ Favorita" : "☆ Favoritar"; fav.classList.toggle("favorita", on); };
+        fav.addEventListener("click", () => { const on = Aluno.alternarFavorito(c.id, k); desenharFav(); Efeitos.pulsar(fav, "estoura"); toast(on ? "★" : "☆", on ? "Aula favoritada" : "Removida dos favoritos"); });
+        desenharFav();
+        // anotações (salva sozinho)
+        const nt = document.getElementById("nota-texto"), ns = document.getElementById("nota-status");
+        nt.value = Aluno.nota(c.id, k);
+        let tNota;
+        nt.addEventListener("input", () => {
+          ns.textContent = "digitando…"; clearTimeout(tNota);
+          tNota = setTimeout(() => { Aluno.salvarNota(c.id, k, nt.value); ns.textContent = "✓ salvo"; }, 800);
+        });
+        nt.addEventListener("blur", () => { if (ns.textContent === "digitando…") { clearTimeout(tNota); Aluno.salvarNota(c.id, k, nt.value); ns.textContent = "✓ salvo"; } });
+        // dúvidas da aula
+        Duvidas.montar(document.getElementById("duvidas"), c, k, aula.titulo);
       }
     }
   }
@@ -1154,13 +1291,16 @@
                     ${rankCursos.map((r, i) => `<tr><td class="pos">${i + 1}</td><td><a href="${linkCurso(r.c.id)}">${esc(r.c.titulo)}</a></td><td>${r.e.pct}%</td><td>${r.e.media != null ? r.e.media + "%" : "—"}</td></tr>`).join("")}
                   </tbody></table>` : '<p class="vazio">Conclua aulas para ver seus cursos aqui.</p>'}
                 </div>
-                <div class="bloco"><h2>🎓 Cursos e certificados</h2><p class="secao-sub">Certificado: todas as aulas concluídas e 70% ou mais em todos os testes do curso.</p>
-                  ${cursos.map((c) => { const e = estadoCurso(c); return `<div class="curso-linha"><div><a class="nome" href="${linkCurso(c.id)}">${esc(c.titulo)}</a><small>${e.feitas}/${e.total} aulas · ${e.notas}/${e.comTeste} testes${e.media != null ? ` · média ${e.media}%` : ""}</small></div>
+                <div class="bloco"><h2>🎓 Cursos e certificados</h2><p class="secao-sub">Certificado: todas as aulas, 70% ou mais em todos os testes e no simulado final.</p>
+                  ${cursos.map((c) => { const e = estadoCurso(c); return `<div class="curso-linha"><div><a class="nome" href="${linkCurso(c.id)}">${esc(c.titulo)}</a><small>${e.feitas}/${e.total} aulas · ${e.notas}/${e.comTeste} testes${e.media != null ? ` · média ${e.media}%` : ""} · simulado ${e.sim ? `${e.sim.melhor}%` : "—"}</small></div>
                     <div class="mini-progresso"><div style="width:${e.pct}%"></div></div>
                     <div>${e.certificado ? `<a class="botao botao-primario botao-pequeno" href="certificado.html?curso=${c.id}">Certificado</a>` : `<span class="selo">${e.pct}%</span>`}</div></div>`; }).join("")}
                 </div>
               </div>
               <div>
+                <div class="bloco"><h2>📝 Anotações e favoritos</h2><p class="secao-sub">${Object.keys(d.notas || {}).length} anotações · ${Object.keys(d.favoritos || {}).length} aulas favoritas</p>
+                  <a class="botao botao-secundario botao-pequeno" href="anotacoes.html">Abrir minhas anotações →</a></div>
+                <div class="bloco" id="bloco-duvidas"><h2>💬 Minhas dúvidas</h2>${Online.ativo ? '<p class="vazio">Carregando…</p>' : '<p class="secao-sub" style="margin:0">Entre na conta para mandar dúvidas nas aulas.</p>'}</div>
                 <div class="bloco"><h2>🏅 Medalhas</h2><p class="secao-sub">${ganhas} de ${MEDALHAS.length} conquistadas.</p>
                   <div class="medalhas">${MEDALHAS.map((m) => `<div class="medalha ${d.medalhas[m.id] ? "ganha" : "bloqueada"}" title="${esc(m.desc)}"><span class="ic">${m.ic}</span><b>${esc(m.nome)}</b><small>${esc(m.desc)}</small></div>`).join("")}</div>
                 </div>
@@ -1196,6 +1336,16 @@
         } else toast("✎", "Apelido salvo", novo);
       });
       blocoOnline(document.getElementById("bloco-online"), render);
+      const bd = document.getElementById("bloco-duvidas");
+      if (Online.ativo && bd) Duvidas.verificarRespostas(true).then((minhas) => {
+        const vistas = ler(Duvidas.VISTAS, {});
+        bd.innerHTML = `<h2>💬 Minhas dúvidas</h2>${minhas && minhas.length ? `<ul class="lista-duvidas">${minhas.slice(0, 10).map((x) => {
+          const cc = acharCurso(x.curso), aa = cc && aulasDoCurso(cc).find((y) => y.k === x.aula);
+          const nova = x.status === "respondida" && !vistas[x.id];
+          return `<li><a href="${linkAula(x.curso, x.aula)}#duvidas"><b>${esc(x.texto.length > 80 ? x.texto.slice(0, 80) + "…" : x.texto)}</b>
+            <small>${esc(aa ? aa.titulo : x.aula)} · ${x.status === "respondida" ? (nova ? '<span class="selo selo-ok">nova resposta!</span>' : "respondida") : "aguardando resposta"}</small></a></li>`;
+        }).join("")}</ul>` : '<p class="vazio">Nenhuma dúvida enviada. Pergunte no fim de qualquer aula.</p>'}`;
+      });
       document.getElementById("exportar").addEventListener("click", () => {
         const blob = new Blob([Aluno.exportar()], { type: "application/json" });
         const a = document.createElement("a");
@@ -1208,6 +1358,64 @@
       });
       document.getElementById("zerar").addEventListener("click", () => {
         if (confirm("Apagar TODO o seu progresso, XP e medalhas deste navegador? Isso não pode ser desfeito (a menos que você tenha baixado uma cópia).")) { Aluno.zerar(); render(); }
+      });
+    }
+    render();
+  }
+
+  // ---------------------------------------------------------------- minhas anotações e favoritos
+  const paginaNotas = document.getElementById("pagina-anotacoes");
+  if (paginaNotas) {
+    let busca = "";
+    const itemAula = (ch) => {
+      const [cid, k] = ch.split("/"), c = acharCurso(cid);
+      const a = c && aulasDoCurso(c).find((x) => x.k === k);
+      return a ? { c, a, ch, k } : null;
+    };
+    function render() {
+      const d = Aluno.dados;
+      const favs = Object.entries(d.favoritos || {}).sort((x, y) => y[1] - x[1]).map(([ch]) => itemAula(ch)).filter(Boolean);
+      const b = busca.toLowerCase();
+      const notas = Object.entries(d.notas || {}).map(([ch, n]) => Object.assign(itemAula(ch) || {}, { n })).filter((x) => x.c)
+        .filter((x) => !b || (x.n.texto + " " + x.a.titulo + " " + x.c.titulo).toLowerCase().includes(b))
+        .sort((x, y) => cursos.indexOf(x.c) - cursos.indexOf(y.c) || x.k.localeCompare(y.k, undefined, { numeric: true }));
+      const grupos = [];
+      notas.forEach((x) => { const g = grupos.find((y) => y.c === x.c); if (g) g.itens.push(x); else grupos.push({ c: x.c, itens: [x] }); });
+      paginaNotas.innerHTML = `
+        <div class="pagina-topo"><div class="container">
+          <div class="migalha"><a href="index.html">Início</a> › <a href="perfil.html">Meu progresso</a> › Anotações</div>
+          <h1>Minhas anotações</h1>
+          <p>Suas aulas favoritas e tudo o que você anotou. ${Online.ativo ? "Salvo na sua conta." : "Salvo neste aparelho. Entre na conta para não perder."}</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap"><form class="campo-busca" style="flex:1" onsubmit="return false"><input id="n-busca" type="search" placeholder="Buscar nas anotações" value="${esc(busca)}"></form>
+          ${notas.length ? '<button class="botao botao-primario" id="n-exportar">⬇ Baixar como texto</button>' : ""}</div>
+        </div></div>
+        <section><div class="container duas-colunas">
+          <div class="bloco"><h2>📝 Anotações (${notas.length})</h2>
+            ${grupos.length ? grupos.map((g) => `<h3 class="notas-curso">${esc(g.c.titulo)}</h3>${g.itens.map((x) => `
+              <article class="nota-cartao"><div class="nota-topo"><a href="${linkAula(x.c.id, x.k)}#anotacao"><b>${esc(x.a.titulo)}</b></a><small>${new Date(x.n.data).toLocaleDateString("pt-BR")}</small></div>
+              <p>${esc(x.n.texto).replace(/\n/g, "<br>")}</p><button class="nota-apagar" data-apagar="${x.ch}" aria-label="Apagar anotação">🗑</button></article>`).join("")}`).join("")
+              : `<p class="vazio">${busca ? "Nada encontrado." : "Nenhuma anotação ainda. Em qualquer aula, use o campo “Minhas anotações”."}</p>`}
+          </div>
+          <div class="bloco"><h2>★ Aulas favoritas (${favs.length})</h2>
+            ${favs.length ? `<ul class="lista-favs">${favs.map((x) => `<li><a href="${linkAula(x.c.id, x.k)}"><b>${esc(x.a.titulo)}</b><small>${esc(x.c.titulo)}</small></a><button data-desfav="${x.ch}" aria-label="Remover dos favoritos">★</button></li>`).join("")}</ul>`
+              : '<p class="vazio">Nenhuma favorita. Use o botão “☆ Favoritar” nas aulas.</p>'}
+          </div>
+        </div></section>`;
+      const inp = paginaNotas.querySelector("#n-busca");
+      inp.addEventListener("input", () => { busca = inp.value; const pos = inp.selectionStart; render(); const n = paginaNotas.querySelector("#n-busca"); n.focus(); n.setSelectionRange(pos, pos); });
+      paginaNotas.querySelectorAll("[data-apagar]").forEach((b2) => b2.addEventListener("click", () => {
+        if (!confirm("Apagar esta anotação?")) return;
+        const [cid, k] = b2.dataset.apagar.split("/"); Aluno.salvarNota(cid, k, ""); render();
+      }));
+      paginaNotas.querySelectorAll("[data-desfav]").forEach((b2) => b2.addEventListener("click", () => { const [cid, k] = b2.dataset.desfav.split("/"); Aluno.alternarFavorito(cid, k); render(); }));
+      const ex = paginaNotas.querySelector("#n-exportar");
+      if (ex) ex.addEventListener("click", () => {
+        const txt = ["ROTA INDUSTRIAL — MINHAS ANOTAÇÕES", `Exportado em ${new Date().toLocaleString("pt-BR")}`, ""].concat(
+          grupos.flatMap((g) => [`=== ${g.c.titulo} ===`, ...g.itens.flatMap((x) => [`--- ${x.a.titulo} ---`, x.n.texto, ""])])).join("\n");
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([txt], { type: "text/plain;charset=utf-8" }));
+        a.download = "rota-industrial-anotacoes.txt"; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       });
     }
     render();
@@ -1387,10 +1595,11 @@
         const faltam = e.todas.filter((x) => !Aluno.aulaFeita(c.id, x.k));
         const baixas = e.todas.filter((x) => quizDe(c.id, x.k)).filter((x) => { const q = Aluno.notaTeste(c.id, x.k); return !q || q.melhor < 70; });
         paginaCert.innerHTML = `<div class="pagina-topo"><div class="container"><div class="migalha"><a href="${linkCurso(c.id)}">${esc(c.titulo)}</a> › Certificado</div><h1>Quase lá!</h1>
-          <p>Para liberar o certificado de <b>${esc(c.titulo)}</b>, conclua todas as aulas e tire 70% ou mais em todos os testes.</p></div></div>
+          <p>Para liberar o certificado de <b>${esc(c.titulo)}</b>, conclua todas as aulas e tire 70% ou mais em todos os testes e no simulado final.</p></div></div>
           <section><div class="container duas-colunas">
             <div class="bloco"><h2>Aulas a concluir (${faltam.length})</h2>${faltam.length ? `<ul>${faltam.map((x) => `<li><a href="${linkAula(c.id, x.k)}">${esc(x.titulo)}</a></li>`).join("")}</ul>` : '<p class="vazio">Todas concluídas ✔</p>'}</div>
             <div class="bloco"><h2>Testes abaixo de 70% (${baixas.length})</h2>${baixas.length ? `<ul>${baixas.map((x) => { const q = Aluno.notaTeste(c.id, x.k); return `<li><a href="${linkAula(c.id, x.k)}#teste">${esc(x.titulo)}</a> — ${q ? q.melhor + "%" : "não feito"}</li>`; }).join("")}</ul>` : '<p class="vazio">Todos aprovados ✔</p>'}</div>
+            <div class="bloco"><h2>Simulado final</h2>${e.simOk ? `<p class="vazio">Aprovado com ${e.sim.melhor}% ✔</p>` : `<p class="secao-sub">${e.sim ? `Sua melhor nota: ${e.sim.melhor}%. Precisa de 70%.` : "Ainda não feito."}</p><a class="botao botao-primario botao-pequeno" href="simulado.html?curso=${c.id}">Fazer o simulado</a>`}</div>
           </div></section>`;
       } else {
         const d = Aluno.dados;
@@ -1461,7 +1670,7 @@
   }
 
   // utilidades usadas pelo painel administrativo (assets/js/admin.js)
-  window.RotaUtil = { esc, fmt, nivelDe, NIVEIS, aulasDoCurso, toast, carregarCurso, quizDe };
+  window.RotaUtil = { esc, fmt, nivelDe, NIVEIS, aulasDoCurso, toast, carregarCurso, quizDe, estadoCurso, linkAula, linkCurso, acharCurso, XP };
 
   // ---------------------------------------------------------------- animações iniciais
   Efeitos.revelar(document.querySelector("main"));

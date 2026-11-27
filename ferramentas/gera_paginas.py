@@ -5,12 +5,13 @@ Ao mudar CSS ou JS, aumente VERSAO para o navegador baixar a versão nova.
 """
 import os
 
-VERSAO = "8"  # manter igual ao usado em sw.js
+VERSAO = "9"  # manter igual ao usado em sw.js
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC = "Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, ranking e certificado."
 
 
-def pagina(arq, titulo, id_pag, main_attr="", corpo="", desc=DESC):
+def pagina(arq, titulo, id_pag, main_attr="", corpo="", desc=DESC, js=()):
+    extra = "".join(f'\n  <script src="assets/js/{n}.js?v={VERSAO}"></script>' for n in js)
     html = f'''<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -37,7 +38,7 @@ def pagina(arq, titulo, id_pag, main_attr="", corpo="", desc=DESC):
   <footer class="rodape-site" id="rodape"></footer>
   <script src="data/cursos.js?v={VERSAO}"></script>
   <script src="data/quizzes.js?v={VERSAO}"></script>
-  <script src="assets/js/main.js?v={VERSAO}"></script>
+  <script src="assets/js/main.js?v={VERSAO}"></script>{extra}
 </body>
 </html>
 '''
@@ -235,5 +236,15 @@ with open(os.path.join(RAIZ, "admin.html"), "w", encoding="utf-8") as f:
 </body>
 </html>
 ''')
+
+pagina("ferramentas.html", "Calculadoras elétricas | Rota Industrial", "ferramentas", ' id="pagina-ferramentas"', '''
+    <div class="pagina-topo"><div class="container">
+      <div class="migalha"><a href="index.html">Início</a> › Calculadoras</div>
+      <h1>Calculadoras elétricas</h1>
+      <p>As contas do dia a dia do eletricista: Lei de Ohm, corrente, queda de tensão, cabo e disjuntor, motores, conversões e resistores. Resultados de referência: confira sempre com a norma e o projeto.</p>
+    </div></div>
+    <section style="padding-top:28px"><div class="container" id="calculadoras"></div></section>''', desc="Calculadoras elétricas grátis: Lei de Ohm, potência e corrente, queda de tensão, bitola de cabo e disjuntor (NBR 5410), corrente de motor, conversão cv/kW e código de cores de resistor.", js=("ferramentas",))
+pagina("simulado.html", "Simulado | Rota Industrial", "cursos", ' id="pagina-simulado"', js=("simulado",))
+pagina("anotacoes.html", "Minhas anotações | Rota Industrial", "perfil", ' id="pagina-anotacoes"')
 
 print("páginas geradas")
