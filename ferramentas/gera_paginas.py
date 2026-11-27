@@ -5,7 +5,7 @@ Ao mudar CSS ou JS, aumente VERSAO para o navegador baixar a versão nova.
 """
 import os
 
-VERSAO = "7"  # manter igual ao usado em sw.js
+VERSAO = "8"  # manter igual ao usado em sw.js
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC = "Rota Industrial: cursos online gratuitos de elétrica para os setores industrial, residencial e comercial, com testes, ranking e certificado."
 
@@ -207,5 +207,33 @@ pagina("offline.html", "Sem conexão | Rota Industrial", "offline", corpo='''
       <p>Esta página ainda não foi aberta neste aparelho, então não está guardada para uso offline. As aulas que você já abriu continuam disponíveis.</p>
       <p><a class="botao botao-primario" href="index.html">Ir para o início</a> <a class="botao botao-secundario" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" href="perfil.html">Meu progresso</a></p>
     </div></div>''')
+
+pagina("entrar.html", "Entrar | Rota Industrial", "entrar", ' id="pagina-entrar"')
+
+# painel administrativo: tela separada (sem cabeçalho/rodapé do site, fora dos buscadores)
+with open(os.path.join(RAIZ, "admin.html"), "w", encoding="utf-8") as f:
+    f.write(f'''<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Painel administrativo | Rota Industrial</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0f1d30">
+  <link rel="icon" href="assets/icones/favicon-32.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v={VERSAO}">
+</head>
+<body data-pagina="admin" class="pagina-admin">
+  <div id="painel"></div>
+  <script src="data/cursos.js?v={VERSAO}"></script>
+  <script src="data/quizzes.js?v={VERSAO}"></script>
+  <script src="assets/js/main.js?v={VERSAO}"></script>
+  <script src="assets/js/admin.js?v={VERSAO}"></script>
+</body>
+</html>
+''')
 
 print("páginas geradas")

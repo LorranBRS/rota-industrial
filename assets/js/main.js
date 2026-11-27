@@ -222,105 +222,179 @@
   })();
   window.RotaAluno = Aluno;
 
-  // ---------------------------------------------------------------- conta online (Supabase)
-  // Sem e-mail e sem senha: o aluno recebe um CÓDIGO DE ACESSO aleatório (o banco guarda só o hash dele).
-  // Com o código, o progresso vai para a nuvem, entra no ranking geral e o certificado fica verificável.
+  // ---------------------------------------------------------------- conta do aluno (telefone + senha, Supabase)
+  // Login é opcional: sem conta, o progresso fica só no navegador. Com conta, vai para a nuvem,
+  // entra no ranking e o certificado fica verificável. A sessão é um token guardado no navegador.
   const Online = (function () {
     const URL_API = "https://xwthvkvwastsalravkwv.supabase.co/rest/v1/rpc/";
     const CHAVE = "sb_publishable_m8N4WcwZ-GXfqBb5a8ibxA_G-GIHEi7"; // chave pública (pode ficar no site)
-    const CH = "rota-online";
+    const CH = "rota-conta";
     let estado = ler(CH, {});
     const ERROS = {
       apelido_em_uso: "Esse apelido já está em uso. Escolha outro.",
-      apelido_invalido: "Use de 3 a 24 caracteres: letras, números, espaço, ponto, hífen ou _.",
-      token_invalido: "Código de acesso inválido.",
-      curso_incompleto: "O progresso salvo online ainda não mostra o curso completo. Tente de novo em alguns segundos.",
+      apelido_invalido: "Apelido: de 3 a 24 caracteres (letras, números, espaço, ponto, hífen ou _).",
+      telefone_invalido: "Telefone inválido. Use DDD + número, ex.: (11) 91234-5678.",
+      telefone_em_uso: "Já existe uma conta com esse telefone. Use \"Entrar\".",
+      senha_curta: "A senha precisa ter pelo menos 6 caracteres.",
+      senha_atual_errada: "Senha atual incorreta.",
+      login_invalido: "Telefone ou senha incorretos.",
+      muitas_tentativas: "Muitas tentativas erradas. Espere 15 minutos e tente de novo.",
+      conta_bloqueada: "Esta conta está bloqueada. Fale com a Rota Industrial.",
+      sessao_invalida: "Sua sessão expirou. Entre de novo.",
+      curso_incompleto: "O progresso salvo na conta ainda não mostra o curso completo. Tente de novo em alguns segundos.",
       nome_invalido: "Digite o nome completo (3 a 80 caracteres).",
-      aluno_nao_encontrado: "Código de acesso não encontrado."
+      sem_permissao: "Você não tem permissão para isso.",
+      nao_em_si_mesmo: "Você não pode fazer isso com a sua própria conta.",
+      aluno_nao_encontrado: "Aluno não encontrado."
     };
+    const msg = (m) => ERROS[m] || `Erro no servidor (${m}).`;
     async function rpc(fn, args) {
       let r;
       try {
-        r = await fetch(URL_API + fn, { method: "POST", headers: { apikey: CHAVE, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+        r = await fetch(URL_API + fn, { method: "POST", headers: { apikey: CHAVE, "Content-Type": "application/json" }, body: JSON.stringify(args || {}) });
       } catch (e) { throw new Error("Sem conexão com o servidor. Tente de novo."); }
       const j = await r.json().catch(() => null);
-      if (!r.ok) { const m = (j && j.message) || "erro"; throw new Error(ERROS[m] || `Erro no servidor (${m}).`); }
+      if (!r.ok) { const m = (j && j.message) || "erro"; const e = new Error(msg(m)); e.codigo = m; throw e; }
+      if (j && j.erro) { const e = new Error(msg(j.erro)); e.codigo = j.erro; throw e; }
       return j;
     }
-    function gerarCodigo() {
-      const alfa = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"; // sem 0/O, 1/I/L
-      const b = new Uint8Array(32);
-      crypto.getRandomValues(b);
-      return formatar(Array.from(b, (x) => alfa[x % alfa.length]).join(""));
-    }
-    const formatar = (s) => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "").replace(/(.{4})(?=.)/g, "$1-");
     const resumo = () => {
       const s = Aluno.resumo();
       return { xp: s.xp, nivel: nivelDe(s.xp).n, seqMelhor: s.seqMelhor, media: s.media, testes: s.testes, aulas: s.aulas, diasMelhor: s.diasMelhor };
     };
     const pacote = () => ({ aluno: Aluno.dados, progresso: Aluno.progresso });
     function salvarEstado() { gravar(CH, estado); }
+    const ouvintes = [];
+    const ouvir = () => ouvintes.forEach((f) => { try { f(estado); } catch (e) { /* ignora */ } });
+    function encerrarLocal(aviso) {
+      estado = {}; salvarEstado(); ouvir();
+      if (aviso) toast("🔒", aviso);
+    }
 
     let timer = null, enviando = null;
     async function enviar() {
       if (!estado.token) return null;
-      enviando = rpc("rota_salvar", { p_token: estado.token, p_apelido: Aluno.dados.apelido, p_resumo: resumo(), p_dados: pacote() })
+      enviando = rpc("rota_salvar", { p_token: estado.token, p_resumo: resumo(), p_dados: pacote() })
         .then((r) => { estado.ultimoEnvio = Date.now(); estado.erro = null; salvarEstado(); ouvir(); return r; })
-        .catch((e) => { estado.erro = e.message; salvarEstado(); ouvir(); throw e; })
+        .catch((e) => {
+          if (e.codigo === "sessao_invalida") encerrarLocal("Sua sessão expirou. Entre de novo para salvar o progresso na conta.");
+          else { estado.erro = e.message; salvarEstado(); ouvir(); }
+          throw e;
+        })
         .finally(() => { enviando = null; });
       return enviando;
     }
-    const ouvintes = [];
-    const ouvir = () => ouvintes.forEach((f) => { try { f(estado); } catch (e) { /* ignora */ } });
-
     // sincroniza sozinho depois de cada mudança (com uma pequena espera)
     Aluno.aoMudar(() => {
       if (!estado.token) return;
       clearTimeout(timer);
       timer = setTimeout(() => enviar().catch(() => {}), 2500);
     });
+    function iniciarSessao(r) {
+      estado = { token: r.token, perfil: r.perfil };
+      salvarEstado();
+      if (r.perfil && r.perfil.apelido) Aluno.definir("apelido", r.perfil.apelido);
+      if (r.perfil && r.perfil.nome && !Aluno.dados.nomeCertificado) Aluno.definir("nomeCertificado", r.perfil.nome);
+    }
 
     return {
       get ativo() { return !!estado.token; },
       get estado() { return estado; },
+      get perfil() { return estado.perfil || null; },
       aoMudar(f) { ouvintes.push(f); },
-      rpc, formatar,
-      enviar,
+      rpc, msg, enviar,
       async aguardar() { if (enviando) { try { await enviando; } catch (e) { /* ignora */ } } },
-      async participar(apelido) {
-        const token = gerarCodigo();
-        const antes = Aluno.dados.apelido;
-        Aluno.definir("apelido", apelido);
-        estado = { token };
-        try { await enviar(); }
-        catch (e) { estado = {}; salvarEstado(); Aluno.definir("apelido", antes); throw e; }
-        salvarEstado(); ouvir();
-        return token;
-      },
-      async entrar(codigo) {
-        const token = formatar(codigo);
-        const r = await rpc("rota_carregar", { p_token: token });
-        if (!r) throw new Error("Código de acesso não encontrado.");
-        Aluno.mesclar(r.dados);
-        Aluno.definir("apelido", r.apelido);
-        estado = { token }; salvarEstado();
-        await enviar();
-        return r;
-      },
-      sair() { estado = {}; salvarEstado(); ouvir(); },
-      async apagar() {
-        await rpc("rota_apagar", { p_token: estado.token });
-        estado = {}; salvarEstado();
-        const d = Aluno.dados; d.certificados = {}; Aluno.definir("certificados", {});
+      async cadastrar(telefone, senha, nome, apelido) {
+        const r = await rpc("rota_cadastrar", { p_telefone: telefone, p_senha: senha, p_nome: nome, p_apelido: apelido });
+        iniciarSessao(r);
+        await enviar().catch(() => {}); // leva o progresso deste aparelho para a conta nova
         ouvir();
+        return r.perfil;
+      },
+      async entrar(telefone, senha) {
+        const r = await rpc("rota_entrar", { p_telefone: telefone, p_senha: senha });
+        iniciarSessao(r);
+        const c = await rpc("rota_carregar", { p_token: r.token }).catch(() => null);
+        if (c && c.dados) Aluno.mesclar(c.dados);   // junta o progresso da conta com o deste aparelho
+        await enviar().catch(() => {});
+        ouvir();
+        return r.perfil;
+      },
+      async sair() {
+        const t = estado.token;
+        clearTimeout(timer);
+        await Online.aguardar();
+        if (t) await rpc("rota_sair", { p_token: t }).catch(() => {});
+        Aluno.zerar(); // o progresso fica salvo na conta; este aparelho volta a ficar limpo
+        encerrarLocal();
+      },
+      async atualizarPerfil() {
+        if (!estado.token) return null;
+        const p = await rpc("rota_eu", { p_token: estado.token }).catch(() => undefined);
+        if (p === null) { encerrarLocal("Sua sessão expirou. Entre de novo."); return null; }
+        if (p) { estado.perfil = p; salvarEstado(); ouvir(); }
+        return p;
+      },
+      async editar(nome, apelido) {
+        const p = await rpc("rota_editar_perfil", { p_token: estado.token, p_nome: nome, p_apelido: apelido });
+        estado.perfil = p; salvarEstado();
+        Aluno.definir("apelido", p.apelido);
+        ouvir();
+        return p;
+      },
+      async trocarSenha(atual, nova) { return rpc("rota_trocar_senha", { p_token: estado.token, p_atual: atual, p_nova: nova }); },
+      async apagar(senha) {
+        await rpc("rota_apagar_conta", { p_token: estado.token, p_senha: senha });
+        Aluno.definir("certificados", {});
+        encerrarLocal();
       }
     };
   })();
   window.RotaOnline = Online;
   if (Online.ativo) {
-    // atualiza o ranking a cada visita (no máximo a cada 10 min)
-    if (!Online.estado.ultimoEnvio || Date.now() - Online.estado.ultimoEnvio > 600000) setTimeout(() => Online.enviar().catch(() => {}), 1200);
+    // a cada visita (no máximo a cada 10 min): confere a sessão e atualiza o ranking
+    if (!Online.estado.ultimoEnvio || Date.now() - Online.estado.ultimoEnvio > 600000) {
+      setTimeout(() => Online.atualizarPerfil().then((p) => { if (p) Online.enviar().catch(() => {}); }), 1200);
+    }
   }
+
+  // ---------------------------------------------------------------- configuração do painel admin (aviso no site, status dos cursos)
+  const Config = (function () {
+    let cfg = ler("rota-config", {});
+    if (Online && typeof fetch === "function") {
+      setTimeout(() => Online.rpc("rota_config").then((c) => {
+        const mudou = JSON.stringify(c) !== JSON.stringify(cfg);
+        gravar("rota-config", c);
+        if (mudou && c.aviso && JSON.stringify(c.aviso) !== JSON.stringify(cfg.aviso)) { cfg = c; mostrarAviso(); }
+      }).catch(() => {}), 400);
+    }
+    function mostrarAviso() {
+      const a = cfg.aviso, topoEl = document.getElementById("topo");
+      const velho = document.getElementById("aviso-site");
+      if (velho) velho.remove();
+      if (!a || !a.ativo || !a.texto || !topoEl) return;
+      const id = String(a.texto).length + ":" + String(a.texto).slice(0, 40);
+      if (ler("rota-aviso-fechado", "") === id) return;
+      const el = document.createElement("div");
+      el.id = "aviso-site";
+      el.className = `aviso-site aviso-${["info", "alerta", "sucesso"].includes(a.tipo) ? a.tipo : "info"}`;
+      const link = a.link && /^(https?:\/\/|[a-z0-9-]+\.html)/i.test(a.link) ? a.link : "";
+      el.innerHTML = `<div class="container"><span>${esc(a.texto)}${link ? ` <a href="${esc(link)}">${esc(a.linkTexto || "Saiba mais")} →</a>` : ""}</span><button aria-label="Fechar aviso">✕</button></div>`;
+      el.querySelector("button").addEventListener("click", () => { gravar("rota-aviso-fechado", id); el.remove(); });
+      topoEl.after(el);
+    }
+    return { get dados() { return cfg; }, mostrarAviso };
+  })();
+  // status dos cursos definido no painel (disponível / em breve / oculto) — aplicado antes de montar as páginas
+  (function aplicarStatusCursos() {
+    if (document.body.dataset.pagina === "admin") return; // o painel sempre vê todos os cursos
+    const st = Config.dados.cursos || {};
+    for (let i = cursos.length - 1; i >= 0; i--) {
+      const s = st[cursos[i].id];
+      if (s === "oculto") cursos.splice(i, 1);
+      else if (s === "disponivel" || s === "em-breve") cursos[i].status = s;
+    }
+  })();
 
   // ---------------------------------------------------------------- avisos (toasts)
   let caixaToasts = null;
@@ -458,7 +532,8 @@
   const topo = document.getElementById("topo");
   function chipXp() {
     const nv = nivelDe(Aluno.dados.xp);
-    return `<a class="chip-xp" href="perfil.html" title="Nível ${nv.n}: ${esc(nv.nome)}"><span class="nivel-n">${nv.n}</span>${fmt(Aluno.dados.xp)} XP</a>`;
+    const entrar = Online.ativo ? "" : `<a class="botao-entrar" href="entrar.html?volta=${encodeURIComponent(location.pathname.split("/").pop() + location.search)}">Entrar</a>`;
+    return `${entrar}<a class="chip-xp" href="perfil.html" title="Nível ${nv.n}: ${esc(nv.nome)}"><span class="nivel-n">${nv.n}</span>${fmt(Aluno.dados.xp)} XP</a>`;
   }
   if (topo) {
     const item = (href, id, txt, icone) => `<a href="${href}" class="${pagina === id ? "ativo" : ""}">${icone ? ico(icone) : ""}${txt}</a>`;
@@ -471,11 +546,13 @@
       <button class="menu-botao" aria-label="Abrir menu" aria-controls="menu">☰</button>
     </div>`;
     topo.querySelector(".menu-botao").addEventListener("click", () => topo.querySelector(".menu").classList.toggle("aberto"));
+    Online.aoMudar(() => { const c = document.getElementById("chip"); if (c) c.innerHTML = chipXp(); });
+    Config.mostrarAviso();
     let xpAntes = Aluno.dados.xp;
     Aluno.aoMudar(() => {
       const c = document.getElementById("chip"); if (!c) return;
       c.innerHTML = chipXp();
-      if (Aluno.dados.xp !== xpAntes) { Efeitos.pulsar(c.firstElementChild, "pulsa"); xpAntes = Aluno.dados.xp; }
+      if (Aluno.dados.xp !== xpAntes) { Efeitos.pulsar(c.querySelector(".chip-xp"), "pulsa"); xpAntes = Aluno.dados.xp; }
     });
   }
   const rodape = document.getElementById("rodape");
@@ -639,68 +716,55 @@
   function blocoOnline(el, aoMudarConta) {
     if (!el) return;
     const hora = (t) => t ? new Date(t).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "—";
+    const volta = encodeURIComponent(location.pathname.split("/").pop() + location.search);
     function desenhar() {
-      const st = Online.estado;
+      const st = Online.estado, p = Online.perfil || {};
       if (!Online.ativo) {
-        el.innerHTML = `<h2>🌐 Ranking geral online</h2>
-          <p class="secao-sub">Entre no ranking com os outros alunos e salve seu progresso na nuvem. <b>Sem e-mail e sem senha</b>: você recebe um código de acesso para usar em outro aparelho.</p>
-          <div class="form-linha"><input id="on-apelido" maxlength="24" placeholder="Seu apelido no ranking" value="${esc(Aluno.dados.apelido)}" aria-label="Apelido">
-          <button class="botao botao-primario botao-pequeno" id="on-participar">Participar</button></div>
-          <p class="nota-mini">No ranking aparecem só o apelido, o nível e os pontos. Você pode apagar sua conta online quando quiser.</p>
-          <details class="ja-tenho"><summary>Já tenho um código de acesso</summary>
-            <div class="form-linha"><input id="on-codigo" placeholder="XXXX-XXXX-XXXX-…" autocomplete="off" spellcheck="false" aria-label="Código de acesso">
-            <button class="botao botao-secundario botao-pequeno" id="on-entrar">Entrar</button></div>
-          </details>
-          <p class="erro-msg" id="on-erro" role="alert"></p>`;
-        const erro = el.querySelector("#on-erro");
-        el.querySelector("#on-participar").addEventListener("click", async (ev) => {
-          const b = ev.currentTarget; b.disabled = true; erro.textContent = "";
-          try {
-            await Online.participar(el.querySelector("#on-apelido").value.trim());
-            toast("🌐", "Você entrou no ranking!", "Guarde seu código de acesso.");
-            if (aoMudarConta) aoMudarConta(); else desenhar();
-          } catch (e) { erro.textContent = e.message; b.disabled = false; }
-        });
-        el.querySelector("#on-entrar").addEventListener("click", async (ev) => {
-          const b = ev.currentTarget; b.disabled = true; erro.textContent = "";
-          try {
-            const r = await Online.entrar(el.querySelector("#on-codigo").value);
-            toast("✔️", `Bem-vindo de volta, ${r.apelido}!`, "Progresso deste aparelho e da nuvem foram juntados.");
-            if (aoMudarConta) aoMudarConta(); else desenhar();
-          } catch (e) { erro.textContent = e.message; b.disabled = false; }
-        });
+        el.innerHTML = `<h2>👤 Sua conta</h2>
+          <p class="secao-sub">Entre com <b>telefone e senha</b> para salvar o progresso na nuvem, aparecer no ranking e ter certificados verificáveis. É grátis e opcional.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a class="botao botao-primario botao-pequeno" href="entrar.html?volta=${volta}">Entrar</a>
+            <a class="botao botao-secundario botao-pequeno" href="entrar.html?criar=1&volta=${volta}">Criar conta</a>
+          </div>
+          <p class="nota-mini">Ao criar a conta, o progresso deste aparelho vai junto.</p>`;
         return;
       }
-      el.innerHTML = `<h2>🌐 Conta online ativa <span class="selo selo-ok">no ranking</span></h2>
-        <p class="secao-sub">Apelido: <b>${esc(Aluno.dados.apelido)}</b> · ${st.erro ? `<span style="color:var(--erro)">⚠ ${esc(st.erro)}</span>` : `sincronizado em ${hora(st.ultimoEnvio)}`}</p>
-        <div class="codigo-acesso"><span>Código de acesso</span><code id="on-cod">${"••••-".repeat(7)}••••</code>
-          <button class="botao botao-secundario botao-pequeno" id="on-ver">Mostrar</button><button class="botao botao-secundario botao-pequeno" id="on-copiar">Copiar</button></div>
-        <p class="nota-mini">⚠ Guarde este código (anote ou salve no celular). Ele é a <b>única forma</b> de recuperar seu progresso em outro aparelho. Não compartilhe.</p>
+      el.innerHTML = `<h2>👤 Sua conta ${p.admin ? '<span class="selo selo-ok">admin</span>' : ""}</h2>
+        <table class="tabela"><tbody>
+          <tr><td>Nome</td><td><b>${esc(p.nome || "—")}</b></td></tr>
+          <tr><td>Apelido no ranking</td><td><b>${esc(p.apelido || "—")}</b></td></tr>
+          <tr><td>Telefone</td><td>${esc(p.telefone || "—")}</td></tr>
+          <tr><td>Nuvem</td><td>${st.erro ? `<span style="color:var(--erro)">⚠ ${esc(st.erro)}</span>` : `✔ sincronizado ${hora(st.ultimoEnvio)}`}</td></tr>
+        </tbody></table>
+        <details class="ja-tenho"><summary>Editar nome e apelido</summary>
+          <div class="form-linha"><input id="c-nome" maxlength="80" value="${esc(p.nome || "")}" placeholder="Nome completo" aria-label="Nome"><input id="c-apelido" maxlength="24" value="${esc(p.apelido || "")}" placeholder="Apelido" aria-label="Apelido">
+          <button class="botao botao-secundario botao-pequeno" id="c-salvar">Salvar</button></div></details>
+        <details class="ja-tenho"><summary>Trocar senha</summary>
+          <div class="form-linha"><input id="c-atual" type="password" autocomplete="current-password" placeholder="Senha atual" aria-label="Senha atual"><input id="c-nova" type="password" autocomplete="new-password" placeholder="Nova senha (6+)" aria-label="Nova senha">
+          <button class="botao botao-secundario botao-pequeno" id="c-senha">Trocar</button></div></details>
+        <p class="erro-msg" id="c-erro" role="alert"></p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-          <button class="botao botao-secundario botao-pequeno" id="on-sync">↻ Sincronizar agora</button>
-          <a class="botao botao-secundario botao-pequeno" href="ranking.html">Ver ranking</a>
-          <button class="botao botao-secundario botao-pequeno" id="on-sair">Sair deste aparelho</button>
-          <button class="botao botao-secundario botao-pequeno" id="on-apagar" style="color:var(--erro)">Apagar conta online</button>
+          <button class="botao botao-secundario botao-pequeno" id="c-sync">↻ Sincronizar</button>
+          ${p.admin ? '<a class="botao botao-escuro botao-pequeno" href="admin.html">⚙ Painel admin</a>' : ""}
+          <button class="botao botao-secundario botao-pequeno" id="c-sair">Sair</button>
+          <button class="botao botao-secundario botao-pequeno" id="c-apagar" style="color:var(--erro)">Apagar conta</button>
         </div>`;
-      let visivel = false;
-      el.querySelector("#on-ver").addEventListener("click", (ev) => {
-        visivel = !visivel;
-        el.querySelector("#on-cod").textContent = visivel ? st.token : `${"••••-".repeat(7)}••••`;
-        ev.currentTarget.textContent = visivel ? "Ocultar" : "Mostrar";
-      });
-      el.querySelector("#on-copiar").addEventListener("click", () => {
-        (navigator.clipboard ? navigator.clipboard.writeText(st.token) : Promise.reject()).then(() => toast("📋", "Código copiado")).catch(() => { el.querySelector("#on-cod").textContent = st.token; });
-      });
-      el.querySelector("#on-sync").addEventListener("click", () => Online.enviar().then(() => toast("☁️", "Sincronizado")).catch((e) => toast("⚠️", "Falha ao sincronizar", e.message)));
-      el.querySelector("#on-sair").addEventListener("click", () => {
-        if (confirm("Sair da conta online neste aparelho? O progresso continua aqui e na nuvem. Para voltar, você vai precisar do código de acesso.")) { Online.sair(); desenhar(); }
-      });
-      el.querySelector("#on-apagar").addEventListener("click", async () => {
-        if (!confirm("Apagar sua conta online? Seu nome sai do ranking e os certificados registrados deixam de ser verificáveis. O progresso neste aparelho continua. Isso não pode ser desfeito.")) return;
-        try { await Online.apagar(); toast("🗑", "Conta online apagada"); desenhar(); } catch (e) { toast("⚠️", "Não foi possível apagar", e.message); }
-      });
+      const erro = el.querySelector("#c-erro");
+      const pegar = (fn) => async (ev) => { const b = ev.currentTarget; b.disabled = true; erro.textContent = ""; try { await fn(); } catch (e) { erro.textContent = e.message; } finally { b.disabled = false; } };
+      el.querySelector("#c-salvar").addEventListener("click", pegar(async () => { await Online.editar(el.querySelector("#c-nome").value, el.querySelector("#c-apelido").value); toast("✔️", "Perfil atualizado"); if (aoMudarConta) aoMudarConta(); }));
+      el.querySelector("#c-senha").addEventListener("click", pegar(async () => { await Online.trocarSenha(el.querySelector("#c-atual").value, el.querySelector("#c-nova").value); toast("🔑", "Senha trocada", "Outros aparelhos foram desconectados."); desenhar(); }));
+      el.querySelector("#c-sync").addEventListener("click", pegar(async () => { await Online.enviar(); toast("☁️", "Sincronizado"); }));
+      el.querySelector("#c-sair").addEventListener("click", pegar(async () => {
+        if (!confirm("Sair da conta neste aparelho? Seu progresso continua salvo na conta, e este aparelho volta a ficar zerado.")) return;
+        await Online.sair(); toast("👋", "Você saiu da conta"); if (aoMudarConta) aoMudarConta(); else desenhar();
+      }));
+      el.querySelector("#c-apagar").addEventListener("click", pegar(async () => {
+        const senha = prompt("Para APAGAR sua conta (nome, telefone, progresso na nuvem e certificados registrados), digite sua senha. Isso não pode ser desfeito.");
+        if (!senha) return;
+        await Online.apagar(senha); toast("🗑", "Conta apagada"); if (aoMudarConta) aoMudarConta(); else desenhar();
+      }));
     }
-    Online.aoMudar(() => { if (document.body.contains(el)) desenhar(); });
+    Online.aoMudar(() => { if (document.body.contains(el) && !el.contains(document.activeElement)) desenhar(); });
     desenhar();
   }
 
@@ -1127,7 +1191,7 @@
         const novo = ap.value.trim().slice(0, 24), antigo = Aluno.dados.apelido;
         Aluno.definir("apelido", novo);
         if (Online.ativo) {
-          try { await Online.enviar(); toast("✎", "Apelido salvo", "Também no ranking geral."); }
+          try { await Online.editar((Online.perfil || {}).nome || novo, novo); toast("✎", "Apelido salvo", "Também no ranking geral."); }
           catch (e) { Aluno.definir("apelido", antigo); ap.value = antigo; toast("⚠️", "Apelido não alterado", e.message); }
         } else toast("✎", "Apelido salvo", novo);
       });
@@ -1149,6 +1213,75 @@
     render();
   }
 
+  // ---------------------------------------------------------------- entrar / criar conta
+  const paginaEntrar = document.getElementById("pagina-entrar");
+  if (paginaEntrar) {
+    const params = new URLSearchParams(location.search);
+    const voltaBruta = params.get("volta") || "perfil.html";
+    const volta = /^[a-z0-9-]+\.html(\?[^#]*)?$/i.test(voltaBruta) && !/^entrar\.html/i.test(voltaBruta) ? voltaBruta : "perfil.html";
+    let modo = params.get("criar") ? "criar" : "entrar";
+    const mascarar = (v) => {
+      const d = v.replace(/\D/g, "").slice(0, 11);
+      if (d.length <= 2) return d ? `(${d}` : "";
+      if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+      if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+      return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+    };
+    function desenhar() {
+      if (Online.ativo) {
+        const p = Online.perfil || {};
+        paginaEntrar.innerHTML = `<div class="entrar-caixa"><div class="entrar-cartao"><h1>Você já está conectado</h1>
+          <p class="secao-sub">Conta de <b>${esc(p.nome || p.apelido || "")}</b> · ${esc(p.telefone || "")}</p>
+          <a class="botao botao-primario" style="width:100%" href="${esc(volta)}">Continuar →</a>
+          <p style="text-align:center;margin-top:12px"><a href="perfil.html">Ver minha conta</a></p></div></div>`;
+        return;
+      }
+      const criar = modo === "criar";
+      paginaEntrar.innerHTML = `<div class="entrar-caixa"><div class="entrar-cartao">
+        <img src="assets/icones/icone-192.png" alt="" width="56" height="56" style="border-radius:14px">
+        <div class="abas-entrar" role="tablist">
+          <button role="tab" aria-selected="${!criar}" class="${criar ? "" : "ativo"}" data-modo="entrar">Entrar</button>
+          <button role="tab" aria-selected="${criar}" class="${criar ? "ativo" : ""}" data-modo="criar">Criar conta</button>
+        </div>
+        <form id="form-conta" novalidate>
+          ${criar ? `<label>Nome completo<input id="f-nome" autocomplete="name" maxlength="80" required placeholder="Como vai sair no certificado"></label>` : ""}
+          <label>Telefone (com DDD)<input id="f-tel" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="(11) 91234-5678" required></label>
+          ${criar ? `<label>Apelido no ranking<input id="f-apelido" maxlength="24" required placeholder="Ex.: Joao Eletricista" value="${esc(Aluno.dados.apelido || "")}"></label>` : ""}
+          <label>Senha${criar ? " (mínimo 6 caracteres)" : ""}<span class="campo-senha"><input id="f-senha" type="password" autocomplete="${criar ? "new-password" : "current-password"}" minlength="6" required><button type="button" class="ver-senha" aria-label="Mostrar senha">👁</button></span></label>
+          ${criar ? `<label class="check"><input type="checkbox" id="f-aceite" required> Concordo em guardar meu nome, telefone e progresso para o funcionamento da conta. Posso apagar tudo quando quiser em Meu progresso.</label>` : ""}
+          <p class="erro-msg" id="f-erro" role="alert"></p>
+          <button class="botao botao-primario" style="width:100%" id="f-enviar">${criar ? "Criar conta" : "Entrar"}</button>
+        </form>
+        ${criar ? `<p class="nota-mini">${Aluno.resumo().aulas ? `O progresso deste aparelho (${Aluno.resumo().aulas} aulas, ${fmt(Aluno.dados.xp)} XP) vai para a conta nova.` : "Seu telefone não aparece para outros alunos: no ranking só aparece o apelido."}</p>`
+          : `<p class="nota-mini">Esqueceu a senha? Fale com a Rota Industrial para receber uma senha nova.</p>`}
+        <p style="text-align:center;margin:14px 0 0"><a href="${esc(volta)}">Continuar sem conta</a></p>
+      </div></div>`;
+      paginaEntrar.querySelectorAll("[data-modo]").forEach((b) => b.addEventListener("click", () => { modo = b.dataset.modo; desenhar(); }));
+      const tel = paginaEntrar.querySelector("#f-tel");
+      tel.addEventListener("input", () => { tel.value = mascarar(tel.value); });
+      paginaEntrar.querySelector(".ver-senha").addEventListener("click", (e) => {
+        const i = paginaEntrar.querySelector("#f-senha"); i.type = i.type === "password" ? "text" : "password"; e.currentTarget.textContent = i.type === "password" ? "👁" : "🙈";
+      });
+      paginaEntrar.querySelector("#form-conta").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const erro = paginaEntrar.querySelector("#f-erro"), b = paginaEntrar.querySelector("#f-enviar");
+        const v = (id) => (paginaEntrar.querySelector(id) || {}).value || "";
+        erro.textContent = "";
+        if (v("#f-tel").replace(/\D/g, "").length < 10) { erro.textContent = "Digite o telefone com DDD."; return; }
+        if (v("#f-senha").length < 6) { erro.textContent = "A senha precisa ter pelo menos 6 caracteres."; return; }
+        if (criar && !paginaEntrar.querySelector("#f-aceite").checked) { erro.textContent = "Marque a caixa de concordância para criar a conta."; return; }
+        b.disabled = true; b.textContent = "Aguarde…";
+        try {
+          const p = criar ? await Online.cadastrar(v("#f-tel"), v("#f-senha"), v("#f-nome"), v("#f-apelido")) : await Online.entrar(v("#f-tel"), v("#f-senha"));
+          toast(criar ? "🎉" : "👋", criar ? "Conta criada!" : `Olá, ${p.nome || p.apelido}!`, criar ? "Seu progresso agora fica salvo na nuvem." : "Progresso sincronizado.");
+          Efeitos.confeteDe(b, criar ? 80 : 30);
+          setTimeout(() => { location.href = volta; }, 900);
+        } catch (err) { erro.textContent = err.message; b.disabled = false; b.textContent = criar ? "Criar conta" : "Entrar"; }
+      });
+    }
+    desenhar();
+  }
+
   // ---------------------------------------------------------------- ranking geral (online)
   const paginaRanking = document.getElementById("pagina-ranking");
   if (paginaRanking) {
@@ -1164,7 +1297,7 @@
       <div class="pagina-topo"><div class="container">
         <div class="migalha"><a href="index.html">Início</a> › Ranking</div>
         <h1>Ranking dos alunos</h1>
-        <p>Quem mais estudou e acertou na Rota Industrial. Participe com um apelido: sem e-mail, sem senha.</p>
+        <p>Quem mais estudou e acertou na Rota Industrial. Entre com telefone e senha para participar.</p>
         <div class="filtros" id="abas" style="margin:0"></div>
       </div></div>
       <section style="padding-top:28px"><div class="container duas-colunas">
@@ -1190,7 +1323,7 @@
           </tbody></table>` : `<p class="vazio">Ninguém pontuou aqui ainda${tipo === "semana" ? " nesta semana" : ""}. Seja o primeiro!</p>`;
       } catch (e) { lista.innerHTML = `<p class="vazio">⚠ ${esc(e.message)}</p>`; }
       const eu = paginaRanking.querySelector("#rk-eu");
-      if (!Online.ativo) { eu.innerHTML = `<h2>📍 Sua posição</h2><p class="secao-sub" style="margin:0">Participe do ranking para ver sua posição.</p>`; return; }
+      if (!Online.ativo) { eu.innerHTML = `<h2>📍 Sua posição</h2><p class="secao-sub" style="margin:0">Entre na sua conta (telefone e senha) para aparecer no ranking.</p>`; return; }
       eu.innerHTML = `<h2>📍 Sua posição</h2><p class="vazio">Calculando…</p>`;
       try {
         await Online.aguardar();
@@ -1280,7 +1413,7 @@
             ? `<p class="cert-status ok">✔ Certificado registrado e verificável: <a href="verificar.html?c=${encodeURIComponent(reg.codigo)}" target="_blank" rel="noopener">${esc(reg.codigo)}</a></p>`
             : Online.ativo
               ? `<p class="cert-status">Gere um código que qualquer pessoa pode conferir online. <button class="botao botao-escuro botao-pequeno" id="registrar">🔒 Registrar certificado verificável</button></p>`
-              : `<p class="cert-status">Este código é só uma referência local. Para ter um certificado <b>verificável online</b>, entre no <a href="perfil.html">ranking online</a> (sem e-mail).</p>`;
+              : `<p class="cert-status">Este código é só uma referência local. Para ter um certificado <b>verificável online</b>, <a href="entrar.html?volta=${encodeURIComponent("certificado.html?curso=" + c.id)}">entre na sua conta</a>.</p>`;
           paginaCert.innerHTML = `<div class="container cert-pagina">
             <div class="cert-acoes"><input id="nome-cert" maxlength="60" placeholder="Seu nome completo" value="${esc(nome)}" aria-label="Nome no certificado">
               <button class="botao botao-primario" id="imprimir">🖨 Imprimir / salvar em PDF</button><a class="botao botao-secundario" href="perfil.html">Meu progresso</a></div>
@@ -1326,6 +1459,9 @@
       }
     }
   }
+
+  // utilidades usadas pelo painel administrativo (assets/js/admin.js)
+  window.RotaUtil = { esc, fmt, nivelDe, NIVEIS, aulasDoCurso, toast, carregarCurso, quizDe };
 
   // ---------------------------------------------------------------- animações iniciais
   Efeitos.revelar(document.querySelector("main"));
